@@ -15,7 +15,7 @@
             @endif
         </div>
         <div class="conteiner-fluid">
-            <table class="table">
+            <table class="table dropdown-header text-black">
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -239,8 +239,8 @@
 
                                 <div class="col-md-4">
                                     <label for="validationCustom02" class="form-label">Önceki Sipariş Adedi</label>
-                                    <input type="text" class="form-control" id="validationCustom02"
-                                        name="onceki_siparis_adedi" placeholder="20" readonly>
+                                    <input type="number" class="form-control" id="validationCustom02"
+                                        name="onceki_siparis_adedi" placeholder="">
                                     <div class="valid-feedback">
                                         Looks good!
                                     </div>
@@ -248,7 +248,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="validationCustom02" class="form-label">Kalan Adedi</label>
-                                <input type="text" class="form-control" id="validationCustom02" name="kalan_adet"
+                                <input type="number" class="form-control" id="validationCustom02" name="kalan_adet"
                                     placeholder="7" required>
                                 <div class="valid-feedback">
                                     Looks good!
@@ -256,7 +256,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="validationCustom02" class="form-label">Güncel Sipariş Adedi</label>
-                                <input type="text" class="form-control" id="validationCustom02"
+                                <input type="number" class="form-control" id="validationCustom02"
                                     name="guncel_siparis_adedi" placeholder="30">
                                 <div class="valid-feedback">
                                     Looks good!
@@ -278,7 +278,7 @@
                                     Looks good!
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md">
                                 <label for="validationCustom02" class="form-label">Sipariş Veren Kişi</label>
                                 <input type="text" class="form-control" id="validationCustom02"
                                     name="siparis_veren_kisi" placeholder="">
@@ -425,30 +425,20 @@
             </div>
         @endforeach
 
-        <div class="">
-            <footer class="d-flex flex-wrap justify-content-between align-items-center py-3  border-top">
-                <div class="col-md-5 d-flex align-items-center">
-                    {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2">
-                <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="70" class="">
-                </a> --}}
-                    <span class="mb-3 mb-md-0 text-muted">© 2025 Company, Tarafından
-                        Üretilmiştir...</span>
-                </div>
 
-                <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24"
-                                height="24">
-                                <use xlink:href="#twitter"></use>
-                            </svg></a></li>
-                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24"
-                                height="24">
-                                <use xlink:href="#instagram"></use>
-                            </svg></a></li>
-                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24"
-                                height="24">
-                                <use xlink:href="#facebook"></use>
-                            </svg></a></li>
-                </ul>
+        <div class="text-center w-100">
+            <footer class="align-items-center border-top d-flex flex-wrap justify-content-around py-3 text-ccenter">
+                <div class="col-md d-flex justify-content-arround position-absolute mt-5">
+                    {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2 w-100 text-muted"> --}}
+                    <span class="app-brand-link gap-2  text-muted">
+                        <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="70" class="">
+                        <strong>HÜSEYİN GENÇ</strong> Tarafından
+                        Üretilmiştir... © 2025 Company </span>
+                    {{-- </a> --}}
+                    {{-- <span class="mb-3 mb-md-0 text-muted w-100">
+                        © 2025 Company, <strong>HÜSEYİN GENÇ</strong> Tarafından
+                        Üretilmiştir...</span> --}}
+                </div>
             </footer>
         </div>
 

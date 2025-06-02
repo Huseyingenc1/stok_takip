@@ -33,15 +33,16 @@
             <div class="authentication-inner py-4">
                 <div class="card">
                     <div class="card-body">
-                        {{-- <div class="app-brand justify-content-center">
-                            <img src="/assets/img/GNCTurco_logo.png" alt="Resim bulunamadı" width="40%" height="20%">
-                        </div> --}}
+                        <div class="app-brand justify-content-center">
+                            <img src="/assets/img/ikon29.png" alt="Resim bulunamadı" width="100%" >
+                        </div>
                         @if (session()->has('success'))
                             <div class="alert alert-success">
                                 {{ session()->get('success') }} <br>
                             </div>
                         @endif
-                        <form id="formAuthentication" class="mb-3" action="{{ route('password_update') }}" method="POST">
+                        <form id="formAuthentication" class="mb-3" action="{{ route('password_update') }}"
+                            method="POST">
                             @csrf
                             <div class="mb-3 form-password-toggle">
                                 <input type="hidden" value="{{ request('email') }}" name="email">
@@ -56,6 +57,11 @@
                             <button type="submit" class="btn btn-primary d-grid w-100">Şifremi Değiştir</button>
                         </form>
                     </div>
+                    <span class="app-brand-link gap-sm-0  text-muted">
+                        <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="50" class="">
+                        <small class="text-center"><strong class="text-center"> HÜSEYİN GENÇ </strong> Tarafından
+                            Üretilmiştir... © 2025 </small>
+                    </span>
                 </div>
             </div>
         </div>

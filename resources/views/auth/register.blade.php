@@ -33,9 +33,9 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="app-brand justify-content-center">
-                            {{-- <div class="justify-content-center">
-                                <img src="/assets/img/GNCTurco_logo.png" alt="Resim bulunamadı" width="40%" height="20%">
-                            </div> --}}
+                            <div class="app-brand justify-content-center">
+                                <img src="/assets/img/ikon29.png" alt="Resim bulunamadı" width="100%">
+                            </div>
                         </div>
                         <h4 class="mb-2">Hoşgeldiniz 🚀</h4>
                         <p class="mb-4">Henüz Kayıt Oluşturmaıdnız mı ?</p>
@@ -98,6 +98,12 @@
                             </a>
                             <span>tıklayınız.</span>
                         </p>
+                        <span class="app-brand-link gap-sm-0  text-muted">
+                            <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="50"
+                                class="">
+                            <small class="text-center"><strong class="text-center"> HÜSEYİN GENÇ </strong> Tarafından
+                                Üretilmiştir... © 2025 </small>
+                        </span>
                     </div>
                 </div>
             </div>

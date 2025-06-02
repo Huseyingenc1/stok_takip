@@ -35,10 +35,9 @@
             <div class="authentication-inner">
                 <div class="card">
                     <div class="card-body">
-                        {{-- <div class="app-brand justify-content-center">
-                            <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="40%" height="20%">
-
-                        </div> --}}
+                        <div class="app-brand justify-content-center">
+                            <img src="/assets/img/ikon29.png" alt="Resim bulunamadı" width="100%" >
+                        </div>
                         <h4 class="mb-2">Hoş Geldiniz ! </h4>
                         <p class="mb-4">Lütfen hesabınıza giriş yapın ...</p>
                         @if ($errors->any())
@@ -91,6 +90,12 @@
                                 Kayıt ol
                             </small>
                         </a>
+                        <span class="app-brand-link gap-sm-0  text-muted">
+                            <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="50"
+                                class="">
+                            <small class="text-center"><strong class="text-center"> HÜSEYİN GENÇ </strong>  Tarafından
+                            Üretilmiştir... © 2025 </small>
+                        </span>
                     </div>
                 </div>
             </div>

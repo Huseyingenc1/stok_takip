@@ -16,24 +16,24 @@
     </style>
     <nav class="navbar navbar-expand-lg mb-12 bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="javascript:void(0)">LOGO</a>
-            {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2">
-                <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="70" class="">
-            </a> --}}
+            {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2 w-100"> --}}
+                <img src="/assets/img/ikon29.png" alt="Resim bulunamadı"  class="">
+            {{-- </a> --}}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+               <img src="assets/img/ikon30.png" alt="" width="30"
+                                        class="menu-icon tf-icons">
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a href="{{ route('anasayfa') }}"
                             class="menu-link text-dark flex-column gap-2 {{ Route::is('anasayfa') ? 'active' : '' }}">
                             <div class="menu-rota btn d-flex flex-column py-1">
                                 <span class="align-middle">STOK LİSTESİ </span>
                             </div>
                         </a>
-                    </li>
+                    </li> --}}
                     {{-- <li class="nav-item">
                         <a href="{{ route('stok') }}"
                             class="menu-link text-dark flex-column gap-2 {{ Route::is('stok') ? 'active' : '' }}">
