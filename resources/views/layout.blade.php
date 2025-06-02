@@ -132,7 +132,7 @@
             <!-- / Menu -->
 
             <!-- Layout container -->
-            <div class="container-p-y container-p-x">
+            <div class="">
                 <!-- Navbar -->
                 @include('partials.nav')
 

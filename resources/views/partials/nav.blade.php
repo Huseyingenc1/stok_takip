@@ -17,15 +17,21 @@
     <nav class="navbar navbar-expand-lg mb-12 bg-body-tertiary">
         <div class="container-fluid">
             {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2 w-100"> --}}
-                <img src="/assets/img/ikon29.png" alt="Resim bulunamadı"  class="">
+            <img src="/assets/img/ikon29.png" alt="Resim bulunamadı" class="">
             {{-- </a> --}}
+
+            <div class="ps-5 pt-lg-3">
+                <h3>
+                    HOŞ GELDİNİZ {{ auth()->user()->name }}
+                </h3>
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-               <img src="assets/img/ikon30.png" alt="" width="30"
-                                        class="menu-icon tf-icons">
+                <img src="assets/img/ikon30.png" alt="" width="30" class="menu-icon tf-icons">
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
                     {{-- <li class="nav-item">
                         <a href="{{ route('anasayfa') }}"
                             class="menu-link text-dark flex-column gap-2 {{ Route::is('anasayfa') ? 'active' : '' }}">
@@ -49,20 +55,19 @@
                     <button class="btn btn-outline-primary" type="submit">
                         <img src="assets/img/ikon26.png" alt="" width="30" class="menu-icon tf-icons">
                     </button>
+                    <div class="ps-2">
+                        <a href="{{ route('anasayfa') }}" class="btn btn-outline-primary"> <img
+                                src="assets/img/ikon31.png" alt="" width="30"
+                                class="menu-icon tf-icons"></a>
+                    </div>
                 </form>
 
 
-                {{-- <li>
-                    <a class="dropdown-item" href="{{ route('profile') }}">
-                        <i class="bx bx-user me-2"></i>
-                        <span class="align-middle">Profile Git</span>
-                    </a>
-                </li> --}}
-                <ul class="navbar-nav mb-2 mb-lg-0">
-                    <li>
+
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <li>
                         <a class="dropdown-item" href="{{ route('logout') }}">
-                            <img src="assets/img/ikon27.png" alt="" width="37"
-                                        class="menu-icon tf-icons">
+                            <img src="assets/img/ikon27.png" alt="" width="37" class="menu-icon tf-icons">
                             {{-- <i class="bx bx-power-off me-2"></i> --}}
                             {{-- <span class="align-middle">Çıkış Yap</span> --}}
                         </a>
@@ -74,3 +79,9 @@
         </div>
     </nav>
 </body>
+{{-- <li>
+                    <a class="dropdown-item" href="{{ route('profile') }}">
+                        <i class="bx bx-user me-2"></i>
+                        <span class="align-middle">Profile Git</span>
+                    </a>
+                </li> --}}
