@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\genel_stok;
 use App\Models\stok;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -243,4 +244,6 @@ class sectionsController extends Controller
             return redirect()->back()->with('error', 'İşlem Başarıyla Düzenlenemedi');
         }
     }
+
+
 }

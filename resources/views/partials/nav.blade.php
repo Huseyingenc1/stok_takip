@@ -50,7 +50,38 @@
                         <img src="assets/img/ikon26.png" alt="" width="30" class="menu-icon tf-icons">
                     </button>
                 </form>
+                <li>
+                    <div class="d-flex p-2">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="bx bx-at"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
+                            <small class="text-muted">{{ auth()->user()->role }}</small>
+                        </div>
+                    </div>
 
+                </li>
+                <li>
+                    <div class="dropdown-divider"></div>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{ route('profile') }}">
+                        <i class="bx bx-user me-2"></i>
+                        <span class="align-middle">Profile Git</span>
+                    </a>
+                </li>
+
+                <li>
+                    <div class="dropdown-divider"></div>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{ route('logout') }}">
+                        <i class="bx bx-power-off me-2"></i>
+                        <span class="align-middle">Çıkış Yap</span>
+                    </a>
+                </li>
+                </ul>
             </div>
         </div>
     </nav>

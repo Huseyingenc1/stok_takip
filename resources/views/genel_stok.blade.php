@@ -4,7 +4,7 @@
 
         <div class="d-flex justify-content-center col-12 " style="background:#adb5bd">
             <div class="col-10 mt-2">
-                <h2 class="text-center text-danger"> GENEL STOK LİSTESİ TABLOSU </h2>
+                <h2 class="text-center text-danger"> GENEL STOK LİSTESİ TABLOSUuuuuuuuuu </h2>
             </div>
             <div class="col-2 mt-2 text-end me-3">
                 <button class="btn btn-outline-secondary text-white" data-bs-toggle="modal" data-bs-target="#exampleModal">
