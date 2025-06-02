@@ -35,10 +35,10 @@
             <div class="authentication-inner">
                 <div class="card">
                     <div class="card-body">
-                        <div class="app-brand justify-content-center">
+                        {{-- <div class="app-brand justify-content-center">
                             <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="40%" height="20%">
 
-                        </div>
+                        </div> --}}
                         <h4 class="mb-2">Hoş Geldiniz ! </h4>
                         <p class="mb-4">Lütfen hesabınıza giriş yapın ...</p>
                         @if ($errors->any())
@@ -83,14 +83,14 @@
                                 </small>
                             </a>
                         </p>
-                        {{-- <p class="text-center">
+                        <p class="text-center">
                             veya
                         </p>
                         <a href="{{ route('register.post') }}" class="d-flex justify-content-center">
                             <small>
                                 Kayıt ol
                             </small>
-                        </a> --}}
+                        </a>
                     </div>
                 </div>
             </div>

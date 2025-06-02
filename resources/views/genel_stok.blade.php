@@ -4,13 +4,15 @@
 
         <div class="d-flex justify-content-center col-12 " style="background:#adb5bd">
             <div class="col-10 mt-2">
-                <h2 class="text-center text-danger"> GENEL STOK LİSTESİ TABLOSUuuuuuuuuu </h2>
+                <h2 class="text-center text-danger"> GENEL STOK LİSTESİ TABLOSU </h2>
             </div>
-            <div class="col-2 mt-2 text-end me-3">
-                <button class="btn btn-outline-secondary text-white" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Yeni Ürün Ekle
-                </button>
-            </div>
+            @if (auth()->user()->role == 0)
+                <div class="col-2 mt-2 text-end me-3">
+                    <button class="btn btn-outline-secondary text-white" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Yeni Ürün Ekle
+                    </button>
+                </div>
+            @endif
         </div>
         <div class="conteiner-fluid">
             <table class="table">
@@ -358,8 +360,7 @@
                                     <div class="col-md-5 w-50">
                                         <label for="validationCustom02" class="form-label">Önceki Sipariş Adedi</label>
                                         <input type="text" class="form-control" id="validationCustom02"
-                                            name="onceki_siparis_adedi" value="{{ $item2->onceki_siparis_adedi }}"
-                                            disabled>
+                                            name="onceki_siparis_adedi" value="{{ $item2->onceki_siparis_adedi }}">
                                         <div class="valid-feedback">
                                             Looks good!
                                         </div>
@@ -795,5 +796,17 @@
                 });
             @endif
         </script>
+
+        @if ($errors->any())
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ürün Eklenemedi !!!',
+                    html: `{!! implode('<br>', $errors->all()) !!}`,
+                    confirmButtonText: 'Tamam'
+                });
+            </script>
+        @endif
+
 
     @endsection

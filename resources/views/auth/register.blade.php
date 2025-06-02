@@ -33,9 +33,9 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="app-brand justify-content-center">
-                            <div class="justify-content-center">
+                            {{-- <div class="justify-content-center">
                                 <img src="/assets/img/GNCTurco_logo.png" alt="Resim bulunamadı" width="40%" height="20%">
-                            </div>
+                            </div> --}}
                         </div>
                         <h4 class="mb-2">Hoşgeldiniz 🚀</h4>
                         <p class="mb-4">Henüz Kayıt Oluşturmaıdnız mı ?</p>
@@ -66,20 +66,7 @@
                                 <input type="number" name="phone" id="phone" class="phone form-control"
                                     placeholder="01234567890">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Rolü</label>
-                                <input type="text" name="role" class="phone form-control" placeholder="eleman">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Çalışıcağı Bölüm</label>
-                                <select name="istasyon_id" class="phone form-control">
-                                    <option value="">Seçiniz</option>
-                                    @foreach ($istasyon as $item)
-                                        <option value="{{ $item->id }}">{{ $item->ad }}</option>
-                                    @endforeach
-                                </select>
 
-                            </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="text" class="form-control" id="email" name="email"
@@ -93,6 +80,11 @@
                                         aria-describedby="password" />
                                     <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                 </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Statü</label>
+                                <input type="text" class="form-control" id="email" name="role" value="Çalışan"
+                                    disabled />
                             </div>
                             <div class="pt-4">
                                 <button class="btn btn-primary d-grid w-100">Kayıt Ol</button>

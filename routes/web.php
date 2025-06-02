@@ -41,9 +41,9 @@ Route::post('/forgot-password', function (\Illuminate\Http\Request $request) {
 
 
 
-Route::middleware('authCheck')->group(function () {
+Route::middleware(AuthCheck::class)->group(function () {
 
-    Route::get('/', [SectionsController::class, 'welcome'])->name('anasayfa');
+    Route::get('/', [SectionsController::class, 'home'])->name('anasayfa');
 
     Route::post('genel_stok_listesi_post', [SectionsController::class, 'genel_stokCreate'])->name('genel_stokCreate');
     Route::post('genel_stok_listesi_update', [SectionsController::class, 'genel_stokupdate'])->name('genel_stokupdate');
@@ -60,3 +60,4 @@ Route::middleware('authCheck')->group(function () {
 
     Route::get('/user', [SectionsController::class, 'login'])->name('login');
 });
+Route::get('/logout', [authController::class, 'destroy'])->name('logout');

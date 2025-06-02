@@ -15,7 +15,7 @@ class authController extends Controller
     public function loginget()
     {
         if (auth()->user()) {
-            return redirect()->route('home');
+            return redirect()->route('anasayfa');
         }
         return view('auth.login');
     }
@@ -45,7 +45,7 @@ class authController extends Controller
             if (is_null(Auth::user()->password)) {
                 return redirect(route('set_password'));
             } else {
-                return redirect(route('home'));
+                return redirect(route('anasayfa'));
             }
         } else {
             return back()->withErrors(['email' => 'E-posta veya şifre geçersiz.']);
@@ -62,6 +62,12 @@ class authController extends Controller
     }
 
     //REGİSTER -------
+
+    public function registercreate()
+    {
+
+        return view('auth.register');
+    }
 
 
 
@@ -101,8 +107,7 @@ class authController extends Controller
             "email" => $req->email,
             "phone" => $req->phone,
             "password" => Hash::make($req->password),
-            "role" => $req->role,
-            "istasyon_id" => $req->istasyon_id,
+            "role" => 1,
         ]);
 
         return redirect('/login');

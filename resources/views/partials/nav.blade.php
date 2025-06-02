@@ -30,18 +30,18 @@
                         <a href="{{ route('anasayfa') }}"
                             class="menu-link text-dark flex-column gap-2 {{ Route::is('anasayfa') ? 'active' : '' }}">
                             <div class="menu-rota btn d-flex flex-column py-1">
-                                <span class="align-middle">ANASAYFA</span>
+                                <span class="align-middle">STOK LİSTESİ </span>
                             </div>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a href="{{ route('stok') }}"
                             class="menu-link text-dark flex-column gap-2 {{ Route::is('stok') ? 'active' : '' }}">
                             <div class="menu-rota btn d-flex flex-column py-1">
                                 <span class="align-middle">ÜRÜN LİSTESİ</span>
                             </div>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
                 <form class="d-flex" method="GET" action="{{ route('search') }}">
                     <input name="q" class="form-control me-2" type="search" placeholder="Ürün Ara"
@@ -50,38 +50,26 @@
                         <img src="assets/img/ikon26.png" alt="" width="30" class="menu-icon tf-icons">
                     </button>
                 </form>
-                <li>
-                    <div class="d-flex p-2">
-                        <div class="flex-shrink-0 me-3">
-                            <i class="bx bx-at"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <span class="fw-semibold d-block">{{ auth()->user()->name }}</span>
-                            <small class="text-muted">{{ auth()->user()->role }}</small>
-                        </div>
-                    </div>
 
-                </li>
-                <li>
-                    <div class="dropdown-divider"></div>
-                </li>
-                <li>
+
+                {{-- <li>
                     <a class="dropdown-item" href="{{ route('profile') }}">
                         <i class="bx bx-user me-2"></i>
                         <span class="align-middle">Profile Git</span>
                     </a>
-                </li>
-
-                <li>
-                    <div class="dropdown-divider"></div>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{{ route('logout') }}">
-                        <i class="bx bx-power-off me-2"></i>
-                        <span class="align-middle">Çıkış Yap</span>
-                    </a>
-                </li>
+                </li> --}}
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('logout') }}">
+                            <img src="assets/img/ikon27.png" alt="" width="37"
+                                        class="menu-icon tf-icons">
+                            {{-- <i class="bx bx-power-off me-2"></i> --}}
+                            {{-- <span class="align-middle">Çıkış Yap</span> --}}
+                        </a>
+                    </li>
                 </ul>
+
+
             </div>
         </div>
     </nav>

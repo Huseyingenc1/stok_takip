@@ -7,10 +7,12 @@ use App\Models\stok;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
 
 class sectionsController extends Controller
 {
-    public function welcome()
+    public function home()
     {
         $genel = genel_stok::paginate(20);
 
@@ -20,6 +22,30 @@ class sectionsController extends Controller
 
     public function genel_stokCreate(Request $req)
     {
+        $validator = Validator::make($req->all(), [
+            'urun_adi' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'kw' => 'nullable|numeric',
+            'onceki_siparis_adedi' => 'nullable|integer|min:0',
+            'kalan_adet' => 'required|integer|min:0',
+            'guncel_siparis_adedi' => 'nullable|integer|min:0',
+            'siparis_verildigi_yer' => 'nullable|string|max:255',
+            'siparis_tarihi' => 'required|date',
+            'siparis_veren_kisi' => 'nullable|string|max:255',
+        ], [
+            'urun_adi.required' => 'Ürün adı alanı boş bırakılamaz.',
+            'model.required' => 'Model alanı boş bırakılamaz.',
+            'kalan_adet.required' => 'Kalan adet alanı boş bırakılamaz.',
+            'siparis_tarihi.required' => 'Sipariş tarihi alanı boş bırakılamaz.',
+            'siparis_tarihi.date' => 'Sipariş tarihi geçerli bir tarih formatında olmalıdır.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         $genel_stok = genel_stok::create([
             "urun_adi" => $req->urun_adi,
             "model" => $req->model,
@@ -33,12 +59,14 @@ class sectionsController extends Controller
             "siparis_durumu" => 'Sipariş Beklemede',
             "created_at" => now(),
         ]);
+
         if ($genel_stok) {
             return redirect()->back()->with('success', 'Stok Kaydı Başarıyla Oluşturuldu');
         } else {
-            return redirect()->back()->with('error', 'Stok Oluştururlurken Bir Hata Oluştu');
+            return redirect()->back()->with('error', 'Stok Oluşturulurken Bir Hata Oluştu');
         }
     }
+
 
     public function genel_stokdelete($id)
     {
@@ -59,6 +87,7 @@ class sectionsController extends Controller
             $genel_stok->update([
                 "kalan_adet" => $req->kalan_adet,
                 "guncel_siparis_adedi" => $req->guncel_siparis_adedi,
+                "onceki_siparis_adedi" => $req->onceki_siparis_adedi,
                 "siparis_verildigi_yer" => $req->siparis_verildigi_yer,
                 "siparis_tarihi" => Carbon::parse($req->siparis_tarihi)->format('Y-m-d H:i'),
 
@@ -244,6 +273,4 @@ class sectionsController extends Controller
             return redirect()->back()->with('error', 'İşlem Başarıyla Düzenlenemedi');
         }
     }
-
-
 }

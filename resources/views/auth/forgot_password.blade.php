@@ -36,9 +36,9 @@
                 <div class="container-xxl">
 
                     <div class="card-body">
-                        <div class="app-brand justify-content-center">
+                        {{-- <div class="app-brand justify-content-center">
                             <img src="/assets/img/GNCTurco_logo.png" alt="Resim bulunamadı" width="40%" height="20%">
-                        </div>
+                        </div> --}}
                         <h4 class="mb-2">Şifreni mi unuttun ? 🔒</h4>
                         <p class="mb-4">Hiç endişelenme önce mail adresini gir ve mailine gönderdiğimiz linke tıkla ve
                             şifreni anında yenile
