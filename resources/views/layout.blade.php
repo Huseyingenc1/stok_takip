@@ -71,7 +71,11 @@
             animation: glow 1.5s ease-in-out infinite;
             transition: all 0.3s ease-in-out;
             color: white;
+        }
 
+        .stable-color {
+            background-color: #ea868f !important;
+            transition: all 0.3s ease-in-out;
         }
 
         .durum-aktif {
@@ -114,6 +118,23 @@
             opacity: 0.6;
             pointer-events: none;
         }
+
+        .pagination .page-item .page-link {
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #e2e6ea;
+        }
     </style>
 </head>
 @yield('css')
@@ -125,8 +146,8 @@
 
 
     <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
-        <div class="layout-container">
+    <div class="">
+        <div class="">
             <!-- Menu -->
             {{-- @include('partials.leftmenu') --}}
             <!-- / Menu -->

@@ -1,206 +1,260 @@
     @extends('layout')
     @section('content')
 
+        <style>
+            .pagination .page-item .page-link {
+                border-radius: 0.5rem;
+                transition: all 0.2s ease-in-out;
+            }
 
-        <div class="d-flex justify-content-center col-12 " style="background:#adb5bd">
-            <div class="col-10 mt-2">
-                <h2 class="text-center text-danger"> GENEL STOK LİSTESİ TABLOSU </h2>
-            </div>
-            @if (auth()->user()->role == 0)
-                <div class="col-2 mt-2 text-end me-3">
-                    <button class="btn btn-outline-secondary text-white" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        Yeni Ürün Ekle
-                    </button>
-                </div>
-            @endif
-        </div>
-        <div class="conteiner-fluid">
-            <table class="table dropdown-header text-black">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Marka Adı</th>
-                        <th scope="col">Model</th>
-                        <th scope="col">KW Değeri</th>
-                        <th scope="col">Önceki Sipariş Adedi</th>
-                        <th scope="col">Kalan Adet</th>
-                        <th scope="col">Güncel Sipariş Adedi</th>
-                        <th scope="col">Sipariş Verildiği Yer</th>
-                        <th scope="col">Sipariş Verildiği Tarih</th>
-                        <th scope="col">Sipariş Veren Kişi</th>
-                        <th scope="col">Siparişin Durumu</th>
-                        <th scope="col" class="text-center"><i class="fa fa-minus-circle"></i></th>
-                        <th scope="col" class="text-center"><i class="fa fa-plus-circle"></i></th>
-                        <th scope="col" class="text-center">DURUMU</th>
-                        <th scope="col" class="text-center"><i class="fa fa-pen-to-square"></i></th>
-                        <th scope="col" class="text-center"><i class="fa fa-trash"></i></th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @forelse ($genel as $item)
-                        <tr id="siparis-123">
-                            <th scope="row">{{ $item->id }} </th>
-                            <td>{{ $item->urun_adi }}</td>
-                            <td>{{ $item->model }} </td>
-                            <td>{{ $item->kw }} </td>
-                            <td style="background: #efadce;" style="background: #ea868f;">{{ $item->onceki_siparis_adedi }}
-                                adet</td>
+            .pagination .page-item.active .page-link {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+                color: white;
+                font-weight: bold;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            }
 
-
-                            <td class="text-center glow" id="kalan_adet_{{ $item->id }}">
-                                {{ $item->kalan_adet }}
-                            </td>
-                            <td style="background: #a3cfbb;" id="guncel_adet_{{ $item->id }}">
-                                {{ $item->guncel_siparis_adedi }}
-                            </td>
-
-
-                            <td>{{ $item->siparis_verildigi_yer }} </td>
-                            <td>{{ $item->siparis_tarihi }} </td>
-                            <td>{{ $item->siparis_veren_kisi }} </td>
-                            <td data-item-id="{{ $item->id }}">{{ $item->siparis_durumu }} </td>
-                            <td class="text-center">
-                                <a href="javascript:void(0);" data-id="{{ $item->id }}"
-                                    data-route="{{ route('genel_eksilt_artır', ['id' => $item->id]) }}"
-                                    onclick="stokGuncelle(this, 'decrease')">
-                                    <img src="assets/img/ikon25.png" alt="" width="30"
-                                        class="menu-icon tf-icons">
-                                </a>
-                            </td>
-                            <td class="text-center">
-                                <a href="javascript:void(0);" data-id="{{ $item->id }}"
-                                    data-route="{{ route('genel_eksilt_artır', ['id' => $item->id]) }}"
-                                    onclick="stokGuncelle(this, 'increase')">
-                                    <img src="assets/img/ikon23.png" alt="" width="30"
-                                        class="menu-icon tf-icons">
-                                </a>
-                            </td>
-                            @php
-                                $durumlar = [
-                                    'sipariş beklemede' => 'Sipariş Beklemede',
-                                    'sipariş verildi' => 'Sipariş Verildi',
-                                    'sipariş teslim alındı' => 'Sipariş Teslim Alındı',
-                                ];
-                                $mevcutDurum = $item->siparis_durumu;
-
-                                $siparisTarihi = \Carbon\Carbon::parse($item->siparis_tarihi);
-                                $bugun = \Carbon\Carbon::today();
-
-                                // Sadece sipariş teslim alındı olan ve tarihi bugünden küçükse disable et
-                                $disabled = $mevcutDurum === 'sipariş teslim alındı' && $siparisTarihi->lt($bugun);
-                            @endphp
-
-                            <td class="siparis-durumu-gosterici">
-                                @foreach ($durumlar as $key => $label)
-                                    @if ($key == $mevcutDurum)
-                                        <span class="durum-aktif">{{ $label }}</span>
-                                    @else
-                                        @if ($disabled)
-                                            <span class="durum-link disabled" style="color: gray; cursor: not-allowed;"
-                                                title="Sipariş teslim alındı ve tarihi geçmiş, düzenleme kapalıdır.">
-                                                {{ $label }}
-                                            </span>
-                                        @else
-                                            <a href="javascript:void(0);" class="durum-link" data-id="{{ $item->id }}"
-                                                data-durum="{{ $key }}"
-                                                data-route="{{ route('siparis_durum_guncelle', ['id' => $item->id]) }}"
-                                                onclick="siparişDurumGuncelle(this)">
-                                                {{ $label }}
-                                            </a>
-                                        @endif
-                                    @endif
-
-                                    @if (!$loop->last)
-                                        <span class="durum-ayirici"> | </span>
-                                    @endif
-                                @endforeach
-                            </td>
-
-
-                            <td class="text-center">
-                                <a href="javascript:void(0);" data-id="{{ $item->id }}"
-                                    data-route="{{ route('genel_stokupdate', ['id' => $item->id]) }}"
-                                    data-bs-toggle="modal" data-bs-target="#modalCenter{{ $item->id }}"
-                                    onclick="confirmUpdate(this)">
-                                    <img src="assets/img/ikon19.png" alt="" width="30"
-                                        class="menu-icon tf-icons">
-                                </a>
-                            </td>
-                            <td class="text-center">
-                                <a href="javascript:void(0);" class="btn kaydet-buton" onclick="confirmDelete(this)"
-                                    data-route="{{ route('genel_stokdelete', $item->id) }}">
-                                    <img src="assets/img/ikon16.png" alt="" width="30"
-                                        class="menu-icon tf-icons">
-                                </a>
-                            </td>
-
+            .pagination .page-item .page-link:hover {
+                background-color: #e2e6ea;
+            }
+        </style>
+        <div class="card">
+            <h5 class="card-header text-center">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table">
+                    <thead>
+                        <tr class="small">
+                            <th scope="col">ID</th>
+                            <th scope="col">Marka Adı</th>
+                            <th scope="col">Model</th>
+                            <th scope="col">KW Değeri</th>
+                            <th scope="col">Önceki Sipariş Adedi</th>
+                            <th scope="col">Kalan Adet</th>
+                            <th scope="col">Güncel Sipariş Adedi</th>
+                            <th scope="col">Sipariş Verildiği Yer</th>
+                            <th scope="col">Sipariş Verildiği Tarih</th>
+                            <th scope="col">Sipariş Veren Kişi</th>
+                            <th scope="col">Siparişin Durumu</th>
+                            <th scope="col" class="text-center"><i class="fa fa-minus-circle"></i></th>
+                            <th scope="col" class="text-center"><i class="fa fa-plus-circle"></i></th>
+                            <th scope="col" class="text-center">DURUMU</th>
+                            <th scope="col" class="text-center"><i class="fa fa-pen-to-square"></i></th>
+                            <th scope="col" class="text-center"><i class="fa fa-trash"></i></th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($genel as $item)
+                            <tr id="siparis-123" class="small">
+                                <th scope="row">{{ $item->id }} </th>
+                                <td>{{ $item->urun_adi }}</td>
+                                <td>{{ $item->model }} </td>
+                                <td>{{ $item->kw }} </td>
+                                <td style="background: #efadce;" style="background: #ea868f;">
+                                    {{ $item->onceki_siparis_adedi }}
+                                    adet</td>
 
-                    @empty
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>
-                                <div class="container-xxl flex-grow-1 container-p-y">
-                                    <div class="row">
-                                        <div class="col-lg-8 mb-4 order-0">
-                                            <div class="card">
-                                                <div class="d-flex align-items-end row">
-                                                    <div class="col-sm-7">
-                                                        <div class="card-body">
-                                                            <h5 class="card-title text-primary">Üzgünüz
-                                                                <i class="bx bx-error-alt"></i>
-                                                            </h5>
-                                                            <p class="mb-4">
-                                                                Herhangi Bir Kayıt Bulunamadı
-                                                            </p>
+
+                                <td class="text-center {{ $item->kalan_adet < 10 ? 'glow' : 'stable-color' }}"
+                                    id="kalan_adet_{{ $item->id }}">
+                                    {{ $item->kalan_adet }}
+                                </td>
+
+
+                                <td style="background: #a3cfbb;" id="guncel_adet_{{ $item->id }}">
+                                    {{ $item->guncel_siparis_adedi }}
+                                </td>
+
+
+                                <td>{{ $item->siparis_verildigi_yer }} </td>
+                                <td>{{ $item->siparis_tarihi }} </td>
+                                <td>{{ $item->siparis_veren_kisi }} </td>
+                                <td data-item-id="{{ $item->id }}">{{ $item->siparis_durumu }} </td>
+                                <td class="text-center">
+                                    <a href="javascript:void(0);" data-id="{{ $item->id }}"
+                                        data-route="{{ route('genel_eksilt_artır', ['id' => $item->id]) }}"
+                                        onclick="stokGuncelle(this, 'decrease')">
+                                        <img src="assets/img/ikon25.png" alt="" width="30"
+                                            class="menu-icon tf-icons">
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="javascript:void(0);" data-id="{{ $item->id }}"
+                                        data-route="{{ route('genel_eksilt_artır', ['id' => $item->id]) }}"
+                                        onclick="stokGuncelle(this, 'increase')">
+                                        <img src="assets/img/ikon23.png" alt="" width="30"
+                                            class="menu-icon tf-icons">
+                                    </a>
+                                </td>
+                                @php
+                                    $durumlar = [
+                                        'sipariş beklemede' => 'Sipariş Beklemede',
+                                        'sipariş verildi' => 'Sipariş Verildi',
+                                        'sipariş teslim alındı' => 'Sipariş Teslim Alındı',
+                                    ];
+                                    $mevcutDurum = $item->siparis_durumu;
+
+                                    $siparisTarihi = \Carbon\Carbon::parse($item->siparis_tarihi);
+                                    $bugun = \Carbon\Carbon::today();
+
+                                    // Sadece sipariş teslim alındı olan ve tarihi bugünden küçükse disable et
+                                    $disabled = $mevcutDurum === 'sipariş teslim alındı' && $siparisTarihi->lt($bugun);
+                                @endphp
+
+                                <td class="siparis-durumu-gosterici">
+                                    @foreach ($durumlar as $key => $label)
+                                        @if ($key == $mevcutDurum)
+                                            <span class="durum-aktif">{{ $label }}</span>
+                                        @else
+                                            @if ($disabled)
+                                                <span class="durum-link disabled" style="color: gray; cursor: not-allowed;"
+                                                    title="Sipariş teslim alındı ve tarihi geçmiş, düzenleme kapalıdır.">
+                                                    {{ $label }}
+                                                </span>
+                                            @else
+                                                <a href="javascript:void(0);" class="durum-link"
+                                                    data-id="{{ $item->id }}" data-durum="{{ $key }}"
+                                                    data-route="{{ route('siparis_durum_guncelle', ['id' => $item->id]) }}"
+                                                    onclick="siparişDurumGuncelle(this)">
+                                                    {{ $label }}
+                                                </a>
+                                            @endif
+                                        @endif
+
+                                        @if (!$loop->last)
+                                            <span class="durum-ayirici"> | </span>
+                                        @endif
+                                    @endforeach
+                                </td>
+
+
+                                <td class="text-center">
+                                    <a href="javascript:void(0);" data-id="{{ $item->id }}"
+                                        data-route="{{ route('genel_stokupdate', ['id' => $item->id]) }}"
+                                        data-bs-toggle="modal" data-bs-target="#modalCenter{{ $item->id }}"
+                                        onclick="confirmUpdate(this)">
+                                        <img src="assets/img/ikon19.png" alt="" width="30"
+                                            class="menu-icon tf-icons">
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="javascript:void(0);" class="btn kaydet-buton" onclick="confirmDelete(this)"
+                                        data-route="{{ route('genel_stokdelete', $item->id) }}">
+                                        <img src="assets/img/ikon16.png" alt="" width="30"
+                                            class="menu-icon tf-icons">
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        @empty
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <div class="container-xxl flex-grow-1 container-p-y">
+                                        <div class="row">
+                                            <div class="col-lg-8 mb-4 order-0">
+                                                <div class="card">
+                                                    <div class="d-flex align-items-end row">
+                                                        <div class="col-sm-7">
+                                                            <div class="card-body">
+                                                                <h5 class="card-title text-primary">Üzgünüz
+                                                                    <i class="bx bx-error-alt"></i>
+                                                                </h5>
+                                                                <p class="mb-4">
+                                                                    Herhangi Bir Kayıt Bulunamadı
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-sm-5 text-center text-sm-left">
-                                                        <div class="card-body pb-0 px-0 px-md-4">
-                                                            <img src="../assets/img/illustrations/page-misc-error-light.png"
-                                                                alt="page-misc-error-light" width="200"
-                                                                data-app-dark-img="illustrations/page-misc-error-dark.png"
-                                                                data-app-light-img="illustrations/page-misc-error-light.png">
+                                                        <div class="col-sm-5 text-center text-sm-left">
+                                                            <div class="card-body pb-0 px-0 px-md-4">
+                                                                <img src="../assets/img/illustrations/page-misc-error-light.png"
+                                                                    alt="page-misc-error-light" width="200"
+                                                                    data-app-dark-img="illustrations/page-misc-error-dark.png"
+                                                                    data-app-light-img="illustrations/page-misc-error-light.png">
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot class="table-border-bottom-0">
+                        <tr>
+
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </tfoot>
 
-            <nav aria-label="Page navigation example" class="border-top py-lg-3">
-                <ul class="pagination justify-content-center">
-                    {{-- Önceki sayfa linki --}}
-                    <li class="page-item {{ $genel->onFirstPage() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $genel->previousPageUrl() ?? '#' }}" tabindex="-1">Previous</a>
-                    </li>
+                </table>
+                <div class="row mx-3 justify-content-between">
+                    <div class="d-md-flex justify-content-between align-items-center dt-layout-start col-md-auto me-auto">
+                        <div class="dt-info" aria-live="polite" id="DataTables_Table_3_info" role="status">1-20
+                            Arasındakiler Gösteriliyor</div>
+                    </div>
+                    <div
+                        class="d-md-flex justify-content-between align-items-center dt-layout-end col-md-auto ms-auto mt-0">
+                        <div class="dt-paging">
+                            <nav aria-label="pagination">
+                                <ul class="pagination mb-3 mt-4">
+                                    <li class="page-item {{ $genel->onFirstPage() ? 'disabled' : '' }}">
+                                        <a class="page-link" href="{{ $genel->previousPageUrl() ?? '#' }}"
+                                            aria-label="Önceki">
+                                            <span aria-hidden="true">&laquo; Önceki</span>
+                                        </a>
+                                    </li>
 
-                    {{-- Sayfa numaraları --}}
-                    @foreach ($genel->getUrlRange(1, $genel->lastPage()) as $page => $url)
-                        <li class="page-item {{ $genel->currentPage() == $page ? 'active' : '' }}">
-                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                        </li>
-                    @endforeach
+                                    {{-- Sayfa numaraları --}}
+                                    @php
+                                        $start = max(1, $genel->currentPage() - 2);
+                                        $end = min($genel->lastPage(), $genel->currentPage() + 2);
+                                    @endphp
 
-                    {{-- Sonraki sayfa linki --}}
-                    <li class="page-item {{ $genel->hasMorePages() ? '' : 'disabled' }}">
-                        <a class="page-link" href="{{ $genel->nextPageUrl() ?? '#' }}">Next</a>
-                    </li>
-                </ul>
-            </nav>
+                                    @if ($start > 1)
+                                        <li class="page-item"><a class="page-link" href="{{ $genel->url(1) }}">1</a>
+                                        </li>
+                                        @if ($start > 2)
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        @endif
+                                    @endif
 
+                                    @for ($i = $start; $i <= $end; $i++)
+                                        <li class="page-item {{ $genel->currentPage() == $i ? 'active' : '' }}">
+                                            <a class="page-link" href="{{ $genel->url($i) }}">{{ $i }}</a>
+                                        </li>
+                                    @endfor
+
+                                    @if ($end < $genel->lastPage())
+                                        @if ($end < $genel->lastPage() - 1)
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        @endif
+                                        <li class="page-item"><a class="page-link"
+                                                href="{{ $genel->url($genel->lastPage()) }}">{{ $genel->lastPage() }}</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Sonraki --}}
+                                    <li class="page-item {{ $genel->hasMorePages() ? '' : 'disabled' }}">
+                                        <a class="page-link" href="{{ $genel->nextPageUrl() ?? '#' }}"
+                                            aria-label="Sonraki">
+                                            <span aria-hidden="true">Sonraki &raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -425,7 +479,7 @@
             </div>
         @endforeach
 
-
+        {{-- FOOTER --}}
         <div class="text-center w-100">
             <footer class="align-items-center border-top d-flex flex-wrap justify-content-around py-3 text-ccenter">
                 <div class="col-md d-flex justify-content-arround position-absolute mt-5">
