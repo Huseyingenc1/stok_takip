@@ -15,6 +15,7 @@ class sectionsController extends Controller
 
     public function home()
     {
+        $alert = genel_stok::get();
         $bugun = Carbon::today()->toDateString();
 
         $genel = genel_stok::orderBy('updated_at', 'desc')->paginate(20);
@@ -26,7 +27,7 @@ class sectionsController extends Controller
         });
 
         $stok = stok::get();
-        return view('genel_stok', compact('genel', 'stok'));
+        return view('genel_stok', compact('genel', 'stok', 'alert'));
     }
 
 

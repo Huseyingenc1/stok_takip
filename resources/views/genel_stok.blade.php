@@ -22,11 +22,12 @@
         <div class="card">
             <div class="row">
                 <h5 class="card-header text-center col-10">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
-               <div class="col-xxl d-flex justify-content-end p-3 pe-5">
-                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    YENİ ÜRÜN EKLE
-                </button>
-               </div>
+                <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                        data-bs-target="#exampleModal">
+                        YENİ ÜRÜN EKLE
+                    </button>
+                </div>
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table">
@@ -52,7 +53,8 @@
                     </thead>
                     <tbody>
                         @forelse ($genel as $item)
-                            <tr id="siparis-123" class="small" style="{{ $item->bugunGuncellendi ? 'background-color: #d4f1f9;' : '' }}">
+                            <tr id="siparis-123" class="small" data-id="{{ $item->id }}"
+                                style="{{ $item->bugunGuncellendi ? 'background-color: #d4f1f9;' : '' }}">
                                 <th scope="row">{{ $item->id }} </th>
                                 <td>{{ $item->urun_adi }}</td>
                                 <td>{{ $item->model }} </td>
@@ -261,8 +263,76 @@
                         </div>
                     </div>
                 </div>
+                <div class="text-center">
+                    <p class="p-3 ps-2">
+                        <button class="btn btn-primary text-black" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#multiCollapseExample1" aria-expanded="false"
+                            aria-controls="multiCollapseExample1" style="background-color: #d4f1f9;">
+                            Renk 1
+                        </button>
+                        <button class="btn btn-primary " type="button" data-bs-toggle="collapse"
+                            data-bs-target="#multiCollapseExample2" aria-expanded="false"
+                            aria-controls="multiCollapseExample2" style="background-color: #efadce">
+                            Renk 2
+                        </button>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#multiCollapseExample3" aria-expanded="false"
+                            aria-controls="multiCollapseExample3" style="background-color: #ea868f">
+                            Renk 3
+                        </button>
+                        <button class="btn btn-primary glow" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#multiCollapseExample4" aria-expanded="false"
+                            aria-controls="multiCollapseExample4">
+                            Renk 4
+                        </button>
+                        <button class="btn btn-primary text-black" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#multiCollapseExample5" aria-expanded="false"
+                            aria-controls="multiCollapseExample5" style="background-color: #a3cfbb">
+                            Renk 5
+                        </button>
+                    </p>
+                    <div class="row">
+                        <div class="col ps-4">
+                            <div class="collapse multi-collapse" id="multiCollapseExample1">
+                                <div class="card card-body" style="background-color: #d4f1f9;">
+                                    Bugün Tarihli Düzenlenen Satırların Arka Plan Rengini Belirtir
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="collapse multi-collapse" id="multiCollapseExample2">
+                                <div class="card card-body" style="background-color: #efadce">
+                                    Bir Önceki Verilen Sipariş Listesi Belirtir
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="collapse multi-collapse" id="multiCollapseExample3">
+                                <div class="card card-body" style="background-color: #ea868f">
+                                    Kalan Adet Listesini Belirtir
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="collapse multi-collapse" id="multiCollapseExample4">
+                                <div class="card card-body glow">
+                                    10 Adet Altına Düşen Kalan Listeyi Belirtir
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="collapse multi-collapse" id="multiCollapseExample5">
+                                <div class="card card-body" style="background-color: #a3cfbb">
+                                    Güncel Sipariş Listesini Belirtir
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        {{-- ------------------------------------ stok ekleme --------------------------- --}}
 
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
