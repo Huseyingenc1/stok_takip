@@ -12,13 +12,24 @@ use Illuminate\Support\Facades\Validator;
 
 class sectionsController extends Controller
 {
+
     public function home()
     {
-        $genel = genel_stok::paginate(20);
+        $bugun = Carbon::today()->toDateString();
+
+        $genel = genel_stok::orderBy('updated_at', 'desc')->paginate(20);
+
+        $genel->getCollection()->transform(function ($item) use ($bugun) {
+            $updatedAt = Carbon::parse($item->updated_at)->toDateString();
+            $item->bugunGuncellendi = $updatedAt === $bugun;
+            return $item;
+        });
 
         $stok = stok::get();
         return view('genel_stok', compact('genel', 'stok'));
     }
+
+
 
     public function genel_stokCreate(Request $req)
     {
@@ -90,6 +101,7 @@ class sectionsController extends Controller
                 "onceki_siparis_adedi" => $req->onceki_siparis_adedi,
                 "siparis_verildigi_yer" => $req->siparis_verildigi_yer,
                 "siparis_tarihi" => Carbon::parse($req->siparis_tarihi)->format('Y-m-d H:i'),
+                "updated_at" => Carbon::parse(now())->format('Y-m-d H:i'),
 
             ]);
             return redirect()->back()->with('success', 'İşlem Başarıyla Düzenlendi');

@@ -20,7 +20,14 @@
             }
         </style>
         <div class="card">
-            <h5 class="card-header text-center">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
+            <div class="row">
+                <h5 class="card-header text-center col-10">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
+               <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    YENİ ÜRÜN EKLE
+                </button>
+               </div>
+            </div>
             <div class="table-responsive text-nowrap">
                 <table class="table">
                     <thead>
@@ -45,7 +52,7 @@
                     </thead>
                     <tbody>
                         @forelse ($genel as $item)
-                            <tr id="siparis-123" class="small">
+                            <tr id="siparis-123" class="small" style="{{ $item->bugunGuncellendi ? 'background-color: #d4f1f9;' : '' }}">
                                 <th scope="row">{{ $item->id }} </th>
                                 <td>{{ $item->urun_adi }}</td>
                                 <td>{{ $item->model }} </td>
