@@ -217,7 +217,9 @@ class sectionsController extends Controller
         return view('genel_stok', compact('genel', 'stok'));
     }
 
+public function stok_mail_gonder(Request $req) {
 
+}
 
 
 

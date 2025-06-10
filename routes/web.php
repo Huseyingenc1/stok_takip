@@ -52,6 +52,9 @@ Route::middleware(AuthCheck::class)->group(function () {
     Route::post('/genel-stok-update/{id}', [SectionsController::class, 'genel_eksilt_artır'])->name('genel_eksilt_artır');
     Route::post('/siparis-durum-guncelle/{id}', [SectionsController::class, 'siparis_durum_guncelle'])->name('siparis_durum_guncelle');
     Route::get('/stok-ara', [SectionsController::class, 'stokAra'])->name('stok.ara');
+    Route::get('/stok_mail_gonder', [SectionsController::class, 'stok_mail_gonder'])->name('stok_mail_gonder');
+
+
 
     Route::get('/stok_listesi', [SectionsController::class, 'stok'])->name('stok');
     Route::post('stok_listesi_post', [SectionsController::class, 'stokCreate'])->name('stok_listesiPost');

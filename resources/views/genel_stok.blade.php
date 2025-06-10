@@ -28,6 +28,12 @@
                         YENİ ÜRÜN EKLE
                     </button>
                 </div>
+                <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop22">
+                        Günün Sipariş Listesi
+                    </button>
+                </div>
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table">
@@ -331,7 +337,54 @@
                 </div>
             </div>
         </div>
+        {{-- ---------------------------------------- sipariş verilecekler dropdownu --------------------------------------------- --}}
 
+        <div class="modal fade" id="staticBackdrop22" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Toplu Sipariş Listesi</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('stok_mail_gonder') }}" class="row g-3 needs-validation" novalidate
+                            method="POST">
+                            @csrf
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Marka Adı</th>
+                                        <th scope="col">Model</th>
+                                        <th scope="col">KW Değeri</th>
+                                        <th scope="col">Güncel Sipariş Adedi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($alert as $geneli)
+                                        @if (\Carbon\Carbon::parse($geneli->updated_at)->isToday())
+                                            <tr>
+                                                <th scope="row">{{ $geneli->id }}</th>
+                                                <td>{{ $geneli->urun_adi }}</td>
+                                                <td>{{ $geneli->model }}</td>
+                                                <td>{{ $geneli->kw }}</td>
+                                                <td>{{ $geneli->guncel_siparis_adedi }}</td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                        <button type="button" class="btn btn-primary">Mail Gönder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         {{-- ------------------------------------ stok ekleme --------------------------- --}}
 
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
