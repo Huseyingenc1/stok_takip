@@ -107,7 +107,7 @@ class authController extends Controller
             "email" => $req->email,
             "phone" => $req->phone,
             "password" => Hash::make($req->password),
-            "role" => 1,
+            "role" => 2,
         ]);
 
         return redirect('/login');

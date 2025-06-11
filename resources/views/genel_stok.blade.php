@@ -20,20 +20,23 @@
             }
         </style>
         <div class="card">
+
             <div class="row">
                 <h5 class="card-header text-center col-10">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
-                <div class="col-xxl d-flex justify-content-end p-3 pe-5">
-                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                        data-bs-target="#exampleModal">
-                        YENİ ÜRÜN EKLE
-                    </button>
-                </div>
-                <div class="col-xxl d-flex justify-content-end p-3 pe-5">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
-                        data-bs-target="#staticBackdrop22">
-                        Günün Sipariş Listesi
-                    </button>
-                </div>
+                @if (in_array(auth()->user()->role, [0, 1]))
+                    <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal">
+                            YENİ ÜRÜN EKLE
+                        </button>
+                    </div>
+                    <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                            data-bs-target="#staticBackdrop22">
+                            Günün Sipariş Listesi
+                        </button>
+                    </div>
+                @endif
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table">
@@ -376,12 +379,14 @@
 
                                 </tbody>
                             </table>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">İptal</button>
+                                <button type="submit" class="btn btn-outline-primary">Mail Gönder</button>
+                            </div>
                         </form>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                        <button type="button" class="btn btn-primary">Mail Gönder</button>
-                    </div>
+
                 </div>
             </div>
         </div>

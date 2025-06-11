@@ -8,7 +8,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StokMail;
 
 class sectionsController extends Controller
 {
@@ -217,9 +218,15 @@ class sectionsController extends Controller
         return view('genel_stok', compact('genel', 'stok'));
     }
 
-public function stok_mail_gonder(Request $req) {
-
-}
+    public function stok_mail_gonder(Request $request)
+    {
+         $alert = genel_stok::whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())->get();
+        // $alert = Stok::all();
+        // Mail adresini ayarla
+        Mail::to('ofvofv10@gmail.com')->send(new StokMail($alert));
+        // dd($alert);
+        return back()->with('success', 'Mail başarıyla gönderildi.');
+    }
 
 
 
