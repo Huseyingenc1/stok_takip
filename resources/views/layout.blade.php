@@ -198,84 +198,11 @@
 
 
 
-    <script>
-        document.getElementById("btnYeniSiparis").addEventListener("click", function() {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 5000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
 
-            Toast.fire({
-                icon: "error",
-                title: "Şuanda Sipariş Veremiyoruz Lütfen Yöneticinize İletişime Geçiniz !"
-            });
-        });
-    </script>
 
-    <script>
-        document.getElementById("pen").addEventListener("click", function() {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 5000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
 
-            Toast.fire({
-                icon: "error",
-                title: "Şuanda Sipariş Düzenlemesi Yapamıyoruz Lütfen Yöneticinize İletişime Geçiniz !"
-            });
-        });
-    </script>
 
-    <script>
-        document.getElementById("sil").addEventListener("click", function() {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: "btn btn-success",
-                    cancelButton: "btn btn-danger"
-                },
-                buttonsStyling: true
-            });
-
-            swalWithBootstrapButtons.fire({
-                title: "Emin misiniz?",
-                text: "Bu işlemi Geri Alamazsınız!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Evet , Sil!",
-                cancelButtonText: "Hayır , İptal!",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    swalWithBootstrapButtons.fire({
-                        title: "Silindi!",
-                        text: "Sipariş Başarıyla Silindi",
-                        icon: "success"
-                    });
-                    // Buraya silme işlemini başlatacak kodu ekleyebilirsin
-                } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    swalWithBootstrapButtons.fire({
-                        title: "İptal Edildi",
-                        text: "Siparişiniz Yanlışlıkla Silinmekten Kurtuldu :)",
-                        icon: "error"
-                    });
-                }
-            });
-        });
-    </script>
+   
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

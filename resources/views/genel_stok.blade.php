@@ -18,19 +18,44 @@
             .pagination .page-item .page-link:hover {
                 background-color: #e2e6ea;
             }
+
+            .vurgulu-satir {
+                background-color: rgb(138 170 205 / 40%) !important;
+                border: 2px solid rgba(67, 89, 113, 0.4) !important;
+                box-shadow: 0 0 10px rgba(174, 174, 174, 0.5) !important;
+            }
+
+            .vurgulu-satir td {
+                font-weight: bold !important;
+            }
+
+            /* CSS ekleyin */
+            @keyframes vurgula {
+                0% {
+                    background-color: transparent;
+                }
+
+                50% {
+                    background-color: #ffeb3b;
+                }
+
+                100% {
+                    background-color: #fff3cd;
+                }
+            }
         </style>
         <div class="card">
 
             <div class="row">
-                <h5 class="card-header text-center col-10">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
+                <h5 class="card-header text-center col-9">ELEKTRİKHANE GENEL STOK TABLOSU</h5>
                 @if (in_array(auth()->user()->role, [0, 1]))
-                    <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                    <div class="col-xxl d-flex justify-content-end h-100 - pt-3">
                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                             data-bs-target="#exampleModal">
                             YENİ ÜRÜN EKLE
                         </button>
                     </div>
-                    <div class="col-xxl d-flex justify-content-end p-3 pe-5">
+                    <div class="col-xxl d-flex justify-content-end h-100 me-5 pt-3">
                         <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
                             data-bs-target="#staticBackdrop22">
                             Günün Sipariş Listesi
@@ -54,21 +79,26 @@
                             <th scope="col">Sipariş Veren Kişi</th>
                             <th scope="col">Siparişin Durumu</th>
                             <th scope="col" class="text-center"><i class="fa fa-minus-circle"></i></th>
-                            <th scope="col" class="text-center"><i class="fa fa-plus-circle"></i></th>
+                            {{-- <th scope="col" class="text-center"><i class="fa fa-plus-circle"></i></th> --}}
                             <th scope="col" class="text-center">DURUMU</th>
                             <th scope="col" class="text-center"><i class="fa fa-pen-to-square"></i></th>
-                            <th scope="col" class="text-center"><i class="fa fa-trash"></i></th>
+                            @if (in_array(auth()->user()->role, [0, 1]))
+                                <th scope="col" class="text-center"><i class="fa fa-trash"></i></th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($genel as $item)
-                            <tr id="siparis-123" class="small" data-id="{{ $item->id }}"
+                            <tr id="siparis-{{ $item->id }}"
+                                class="small {{ isset($targetId) && $targetId == $item->id ? 'vurgulu-satir' : '' }} "
+                                data-id="{{ $item->id }}"
                                 style="{{ $item->bugunGuncellendi ? 'background-color: #d4f1f9;' : '' }}">
+
                                 <th scope="row">{{ $item->id }} </th>
                                 <td>{{ $item->urun_adi }}</td>
                                 <td>{{ $item->model }} </td>
                                 <td>{{ $item->kw }} </td>
-                                <td style="background: #efadce;" style="background: #ea868f;">
+                                <td style="background: #efadce;" style="background: #ea868f;" data-onceki>
                                     {{ $item->onceki_siparis_adedi }}
                                     adet</td>
 
@@ -96,18 +126,18 @@
                                             class="menu-icon tf-icons">
                                     </a>
                                 </td>
-                                <td class="text-center">
+                                {{-- <td class="text-center">
                                     <a href="javascript:void(0);" data-id="{{ $item->id }}"
                                         data-route="{{ route('genel_eksilt_artır', ['id' => $item->id]) }}"
                                         onclick="stokGuncelle(this, 'increase')">
                                         <img src="assets/img/ikon23.png" alt="" width="30"
                                             class="menu-icon tf-icons">
                                     </a>
-                                </td>
+                                </td> --}}
                                 @php
                                     $durumlar = [
-                                        'sipariş beklemede' => 'Sipariş Beklemede',
-                                        'sipariş verildi' => 'Sipariş Verildi',
+                                        // 'sipariş beklemede' => 'Sipariş Beklemede',
+                                        // 'sipariş verildi' => 'Sipariş Verildi',
                                         'sipariş teslim alındı' => 'Sipariş Teslim Alındı',
                                     ];
                                     $mevcutDurum = $item->siparis_durumu;
@@ -155,16 +185,17 @@
                                             class="menu-icon tf-icons">
                                     </a>
                                 </td>
-                                <td class="text-center">
-                                    <a href="javascript:void(0);" class="btn kaydet-buton" onclick="confirmDelete(this)"
-                                        data-route="{{ route('genel_stokdelete', $item->id) }}">
-                                        <img src="assets/img/ikon16.png" alt="" width="30"
-                                            class="menu-icon tf-icons">
-                                    </a>
-                                </td>
 
+                                @if (in_array(auth()->user()->role, [0, 1]))
+                                    <td class="text-center">
+                                        <a href="javascript:void(0);" class="btn kaydet-buton" onclick="confirmDelete(this)"
+                                            data-route="{{ route('genel_stokdelete', $item->id) }}">
+                                            <img src="assets/img/ikon16.png" alt="" width="30"
+                                                class="menu-icon tf-icons">
+                                        </a>
+                                    </td>
+                                @endif
                             </tr>
-
                         @empty
                             <tr>
                                 <td></td>
@@ -404,16 +435,25 @@
                         <form action="{{ route('genel_stokCreate') }}" class="row g-3 needs-validation" novalidate
                             method="POST">
                             @csrf
-                            {{-- <div class="col-md-4">
-                                <label for="validationCustom01" class="form-label"> ÜRÜN ADI</label>
-                                <input type="text" class="form-control" id="validationCustom01" name="urun_adi"
-                                    placeholder="SCHNEIDER">
-                                <div class="valid-feedback">
-                                    Looks good!
-                                </div>
-                            </div> --}}
                             <div class="row">
-                                <div class="col-md-8">
+
+                                <div class="col-md-6">
+                                    <label for="validationCustom01" class="form-label"> ÜRÜN ADI</label>
+                                    <input type="text" class="form-control" id="validationCustom01" name="urun_adi"
+                                        placeholder="SCHNEIDER">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="validationCustom01" class="form-label"> ÜRÜN MODELİ</label>
+                                    <input type="text" class="form-control" id="validationCustom01" name="model"
+                                        placeholder="Atv 320">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                {{-- <div class="col-md-8">
                                     <label for="stok_secimi" class="form-label">ÜRÜN ADI</label>
                                     <select id="stok_secimi" class="form-select select2" name="urun_adi"
                                         aria-label="Default select example">
@@ -424,9 +464,9 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                </div>
+                                </div> --}}
 
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label for="validationCustom02" class="form-label">Önceki Sipariş Adedi</label>
                                     <input type="number" class="form-control" id="validationCustom02"
                                         name="onceki_siparis_adedi" placeholder="">
@@ -434,47 +474,48 @@
                                         Looks good!
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="validationCustom02" class="form-label">Kalan Adedi</label>
-                                <input type="number" class="form-control" id="validationCustom02" name="kalan_adet"
-                                    placeholder="7" required>
-                                <div class="valid-feedback">
-                                    Looks good!
+                                <div class="col-md-6">
+                                    <label for="validationCustom02" class="form-label">Kalan Adedi</label>
+                                    <input type="number" class="form-control" id="validationCustom02" name="kalan_adet"
+                                        placeholder="7" required>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="validationCustom02" class="form-label">Güncel Sipariş Adedi</label>
+                                    <input type="number" class="form-control" id="validationCustom02"
+                                        name="guncel_siparis_adedi" placeholder="30">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="validationCustom02" class="form-label">Sipariş Verildiği Yer</label>
+                                    <input type="text" class="form-control" id="validationCustom02"
+                                        name="siparis_verildigi_yer" placeholder="KONYA ENERJİ">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="validationCustom02" class="form-label">Sipariş Tariihi</label>
+                                    <input type="date" class="form-control" id="validationCustom02"
+                                        name="siparis_tarihi" placeholder="">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="validationCustom02" class="form-label">Sipariş Veren Kişi</label>
+                                    <input type="text" class="form-control" id="validationCustom02"
+                                        name="siparis_veren_kisi" placeholder="">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label for="validationCustom02" class="form-label">Güncel Sipariş Adedi</label>
-                                <input type="number" class="form-control" id="validationCustom02"
-                                    name="guncel_siparis_adedi" placeholder="30">
-                                <div class="valid-feedback">
-                                    Looks good!
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="validationCustom02" class="form-label">Sipariş Verildiği Yer</label>
-                                <input type="text" class="form-control" id="validationCustom02"
-                                    name="siparis_verildigi_yer" placeholder="KONYA ENERJİ">
-                                <div class="valid-feedback">
-                                    Looks good!
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="validationCustom02" class="form-label">Sipariş Tariihi</label>
-                                <input type="date" class="form-control" id="validationCustom02" name="siparis_tarihi"
-                                    placeholder="">
-                                <div class="valid-feedback">
-                                    Looks good!
-                                </div>
-                            </div>
-                            <div class="col-md">
-                                <label for="validationCustom02" class="form-label">Sipariş Veren Kişi</label>
-                                <input type="text" class="form-control" id="validationCustom02"
-                                    name="siparis_veren_kisi" placeholder="">
-                                <div class="valid-feedback">
-                                    Looks good!
-                                </div>
-                            </div>
+
                             {{-- <div class="col-md-4">
                                 <label for="validationCustom02" class="form-label">MODEL</label>
                                 <input type="text" class="form-control" id="validationCustom02" name="model"
@@ -775,10 +816,7 @@
                 const durumTd = document.querySelector(`#siparis-${itemId} .siparis-durumu-gosterici`);
 
                 if (durumTd) {
-                    // Durum metnini güncelle
                     durumTd.textContent = yeniDurum;
-
-                    // Önceki sınıfları temizle
                     durumTd.classList.remove(
                         'durum-Onaylandı',
                         'durum-Hazırlanıyor',
@@ -786,13 +824,10 @@
                         'durum-TeslimEdildi',
                         'durum-İptalEdildi'
                     );
-
-                    // Yeni sınıfı ekle
                     durumTd.classList.add(`durum-${yeniDurum.replace(/\s/g, '')}`);
 
-                    // Eğer durum "sipariş teslim alındı" ise
+                    const links = durumTd.querySelectorAll('.durum-link');
                     if (yeniDurum.toLowerCase() === 'sipariş teslim alındı') {
-                        const links = durumTd.querySelectorAll('.durum-link');
                         links.forEach(link => {
                             link.classList.add('disabled');
                             link.style.pointerEvents = 'none';
@@ -801,29 +836,35 @@
 
                         const guncelAdetTd = document.querySelector(`#guncel_adet_${itemId}`);
                         const kalanAdetTd = document.querySelector(`#kalan_adet_${itemId}`);
+                        const oncekiAdetTd = document.querySelector(`#siparis-${itemId} td[data-onceki]`);
 
                         if (guncelAdetTd && kalanAdetTd) {
                             const guncelAdet = parseInt(guncelAdetTd.textContent.trim()) || 0;
                             const kalanAdet = parseInt(kalanAdetTd.textContent.trim()) || 0;
-                            const toplam = guncelAdet + kalanAdet;
-                            kalanAdetTd.textContent = toplam;
-                            console.log(`Güncellendi: kalan_adet_${itemId} = ${toplam}`);
-                        } else {
-                            console.warn(`Hücreler bulunamadı: guncel_adet_${itemId} veya kalan_adet_${itemId}`);
-                        }
+                            const toplam = kalanAdet + guncelAdet;
 
+                            kalanAdetTd.textContent = toplam;
+                            guncelAdetTd.textContent = 0;
+
+                            if (oncekiAdetTd) {
+                                oncekiAdetTd.textContent = `${guncelAdet} adet`;
+                            }
+
+                            console.log(
+                                `Güncellendi: kalan_adet_${itemId} = ${toplam}, guncel_adet = 0, onceki_adet = ${guncelAdet}`
+                            );
+                        } else {
+                            console.warn(`Hücreler bulunamadı: guncel_adet_${itemId}, kalan_adet_${itemId} veya önceki`);
+                        }
                     } else {
-                        // Diğer durumlarda linkleri aktif et
-                        const links = durumTd.querySelectorAll('.durum-link');
                         links.forEach(link => {
                             link.classList.remove('disabled');
                             link.style.pointerEvents = 'auto';
                             link.onclick = null;
                         });
                     }
-
                 } else {
-                    console.warn(`Sipariş ID ${itemId} için durum güncelleme TD'si bulunamadı.`);
+                    console.warn(`Sipariş ID ${itemId} için durum hücresi bulunamadı.`);
                 }
             }
 
@@ -838,6 +879,21 @@
                 if (!csrfToken) {
                     console.error('CSRF token bulunamadı');
                     return;
+                }
+
+                // Bu değerler burada hesaplanmalı çünkü fetch içine yazılacak
+                let guncelAdet = 0;
+                let toplam = 0;
+
+                if (yeniDurum.toLowerCase() === 'sipariş teslim alındı') {
+                    const guncelAdetTd = document.querySelector(`#guncel_adet_${itemId}`);
+                    const kalanAdetTd = document.querySelector(`#kalan_adet_${itemId}`);
+
+                    if (guncelAdetTd && kalanAdetTd) {
+                        guncelAdet = parseInt(guncelAdetTd.textContent.trim()) || 0;
+                        const kalanAdet = parseInt(kalanAdetTd.textContent.trim()) || 0;
+                        toplam = kalanAdet + guncelAdet;
+                    }
                 }
 
                 Swal.fire({
@@ -858,7 +914,10 @@
                                     'Accept': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    yeni_durum: yeniDurum
+                                    yeni_durum: yeniDurum,
+                                    guncel_siparis_adedi: 0,
+                                    onceki_siparis_adedi: guncelAdet,
+                                    kalan_adet: toplam
                                 })
                             })
                             .then(response => {
@@ -891,10 +950,11 @@
                                 });
                             });
                     }
-
                 });
             }
         </script>
+
+
 
 
 

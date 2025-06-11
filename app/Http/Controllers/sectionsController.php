@@ -10,25 +10,35 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StokMail;
+use Illuminate\Support\Facades\DB;
 
 class sectionsController extends Controller
 {
 
-    public function home()
+    public function home(Request $request)
     {
         $alert = genel_stok::get();
+        $eksikStoklar = genel_stok::where('kalan_adet', '<', 10)->get();
         $bugun = Carbon::today()->toDateString();
 
-        $genel = genel_stok::orderBy('updated_at', 'desc')->paginate(20);
+        $targetId = $request->query('id'); // URL'den gelen ID
+        $sayfa = 1;
+
+        if ($targetId) {
+            $index = genel_stok::orderBy('updated_at', 'desc')->pluck('id')->search($targetId);
+            if ($index !== false) {
+                $sayfa = floor($index / 20) + 1; // Her sayfada 20 kayıt varsa
+            }
+        }
+
+        $genel = genel_stok::orderBy('updated_at', 'desc')->paginate(20, ['*'], 'page', $sayfa);
 
         $genel->getCollection()->transform(function ($item) use ($bugun) {
-            $updatedAt = Carbon::parse($item->updated_at)->toDateString();
-            $item->bugunGuncellendi = $updatedAt === $bugun;
+            $item->bugunGuncellendi = Carbon::parse($item->updated_at)->toDateString() === $bugun;
             return $item;
         });
 
-        $stok = stok::get();
-        return view('genel_stok', compact('genel', 'stok', 'alert'));
+        return view('genel_stok', compact('genel', 'alert', 'eksikStoklar', 'targetId'));
     }
 
 
@@ -103,6 +113,7 @@ class sectionsController extends Controller
                 "onceki_siparis_adedi" => $req->onceki_siparis_adedi,
                 "siparis_verildigi_yer" => $req->siparis_verildigi_yer,
                 "siparis_tarihi" => Carbon::parse($req->siparis_tarihi)->format('Y-m-d H:i'),
+                "siparis_durumu" => 'Sipariş Beklemede',
                 "updated_at" => Carbon::parse(now())->format('Y-m-d H:i'),
 
             ]);
@@ -154,7 +165,7 @@ class sectionsController extends Controller
                 'request_data' => $request->all()
             ]);
 
-            $item = genel_stok::findOrFail($id); // Model adını doğru yazdığından emin ol
+            $item = genel_stok::findOrFail($id);
 
             $yeniDurum = $request->input('yeni_durum');
 
@@ -164,16 +175,25 @@ class sectionsController extends Controller
                 'sipariş teslim alındı'
             ];
 
-            if (!in_array($yeniDurum, $gecerliDurumlar)) {
+            if (!in_array(strtolower($yeniDurum), $gecerliDurumlar)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Geçersiz sipariş durumu'
                 ]);
             }
 
-            // Eğer durum "sipariş teslim alındı" ise kalan adeti güncelle
+            // Eğer durum "sipariş teslim alındı" ise
             if (strtolower($yeniDurum) == 'sipariş teslim alındı') {
-                $item->kalan_adet = $item->kalan_adet + $item->guncel_siparis_adedi;
+                $eskiGuncelAdet = $item->guncel_siparis_adedi;
+
+                // 1. Kalan = kalan + güncel
+                $item->kalan_adet = $item->kalan_adet + $eskiGuncelAdet;
+
+                // 2. Önceki sipariş = eski güncel
+                $item->onceki_siparis_adedi = $eskiGuncelAdet;
+
+                // 3. Güncel sipariş = 0
+                $item->guncel_siparis_adedi = 0;
             }
 
             // Sipariş durumunu güncelle
@@ -182,7 +202,7 @@ class sectionsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Sipariş durumu ve kalan adet başarıyla güncellendi',
+                'message' => 'Sipariş durumu ve adetler başarıyla güncellendi',
                 'yeni_durum' => $yeniDurum
             ]);
         } catch (\Exception $e) {
@@ -198,6 +218,7 @@ class sectionsController extends Controller
             ], 500);
         }
     }
+
 
     public function search(Request $request)
     {
@@ -220,7 +241,7 @@ class sectionsController extends Controller
 
     public function stok_mail_gonder(Request $request)
     {
-         $alert = genel_stok::whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())->get();
+        $alert = genel_stok::whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())->get();
         // $alert = Stok::all();
         // Mail adresini ayarla
         Mail::to('ofvofv10@gmail.com')->send(new StokMail($alert));
@@ -228,8 +249,46 @@ class sectionsController extends Controller
         return back()->with('success', 'Mail başarıyla gönderildi.');
     }
 
+    public function stok_mail()
+    {
+        $alert = genel_stok::whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())->get();
+        return view('emails.stok_mail', compact('alert'));
+    }
 
+    public function onayla(Request $request)
+    {
+        $ids = explode(',', $request->query('ids'));
 
+        if (empty($ids)) {
+            return response('Geçersiz sipariş ID\'leri.', 400);
+        }
+
+        DB::table('genel_stok')
+            ->whereIn('id', $ids)
+            ->update(['siparis_durumu' => 'Sipariş Verildi']);
+
+        return response('
+                            <html>
+                                <head>
+                                    <meta http-equiv="refresh" content="5;url=' . route('anasayfa') . '">
+                                    <script>
+                                        let seconds = 5;
+                                        const countdown = setInterval(function() {
+                                            if (seconds <= 1) {
+                                                clearInterval(countdown);
+                                            }
+                                            seconds--;
+                                            document.getElementById("countdown").innerText = seconds;
+                                        }, 1000);
+                                    </script>
+                                </head>
+                                <body style="font-family: Arial; text-align: center; padding-top: 50px;">
+                                    <h2 style="color: green;">Sipariş(ler) başarıyla onaylandı.</h2>
+                                    <p><span id="countdown">5</span> saniye içinde ana sayfaya yönlendiriliyorsunuz...</p>
+                                </body>
+                            </html>
+                     ');
+    }
 
 
 

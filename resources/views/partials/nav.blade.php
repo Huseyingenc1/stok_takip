@@ -16,9 +16,9 @@
 
         /* CSS ekleyin */
         .vurgulu-satir {
-            background-color: #fff3cd !important;
-            border: 2px solid #ffc107 !important;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5) !important;
+            background-color: rgb(138 170 205 / 40%) !important;
+            border: 2px solid rgba(67, 89, 113, 0.4) !important;
+            box-shadow: 0 0 10px rgba(174, 174, 174, 0.5) !important;
         }
 
         .vurgulu-satir td {
@@ -40,32 +40,8 @@
             }
         }
 
-        .vurgulu-satir {
-            animation: vurgula 0.5s ease-in-out;
-            background-color: #fff3cd !important;
-            border-left: 4px solid #ff9800 !important;
-        }
 
-        .yanip-son {
-            animation: yanipSon 2s ease-in-out;
-        }
 
-        @keyframes yanipSon {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            25%,
-            75% {
-                opacity: 0.7;
-            }
-
-            50% {
-                opacity: 0.4;
-            }
-        }
     </style>
     <nav class="navbar navbar-expand-lg mb-12 bg-body-tertiary">
         <div class="container-fluid">
@@ -127,6 +103,7 @@
                             </span>
                         @endif
                     </button>
+                    @php $eksikStokSayisi = $eksikStoklar->count(); @endphp
                     <ul class="dropdown-menu"
                         style="@if ($eksikStokSayisi > 20) max-height: 400px; overflow-y: auto; @endif">
                         <li>
@@ -135,23 +112,24 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        @forelse ($alert->where('kalan_adet', '<', 10) as $item)
-                            <li>
+                        @forelse ($eksikStoklar as $item)
+                            {{-- <li>
                                 <a class="dropdown-item" href="javascript:void(0);"
                                     onclick="tabloSatiriBul({{ $item->id }})">
-                                    {{ $item->urun_adi }} -> {{ $item->model }} ->
-                                    @if ($item->kw != 0)
-                                        {{ $item->kw }}
-                                    @else
-                                        -
-                                    @endif
+                                    {{ $item->urun_adi }} -> {{ $item->model }} -> {{ $item->kw ?: '-' }}
                                 </a>
+                            </li> --}}
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('genel_stok', ['id' => $item->id]) }}">{{ $item->urun_adi }} ->
+                                    {{ $item->model }} -> {{ $item->kw ?: '-' }}</a>
                             </li>
                         @empty
                             <li>
                                 <p class="dropdown-item-text">Herhangi bir eksik stok bulunmamaktadır...</p>
                             </li>
                         @endforelse
+
                     </ul>
                 </div>
 
@@ -168,42 +146,7 @@
 
             </div>
         </div>
-        <script>
-            function tabloSatiriBul(id) {
-                // Önce tüm vurguları temizle
-                document.querySelectorAll('.vurgulu-satir').forEach(el => {
-                    el.classList.remove('vurgulu-satir');
-                });
 
-                // Tabloda o ID'yi bul
-                const satir = document.querySelector(`[data-id="${id}"]`);
-                if (satir) {
-                    // Dropdown'u kapat
-                    const dropdown = document.querySelector('.btn-group .dropdown-toggle');
-                    if (dropdown) {
-                        dropdown.click();
-                    }
-
-                    // Sayfayı o satıra kaydır
-                    satir.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-
-                    // Satırı vurgula
-                    setTimeout(() => {
-                        satir.classList.add('vurgulu-satir');
-                    }, 1000);
-
-                    // 5 saniye sonra vurguyu kaldır
-                    setTimeout(() => {
-                        satir.classList.remove('vurgulu-satir');
-                    }, 10000);
-                } else {
-                    alert('Ürün bulunamadı!');
-                }
-            }
-        </script>
     </nav>
 </body>
 {{-- <li>

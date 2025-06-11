@@ -22,6 +22,7 @@ class genel_stok extends Model
         'siparis_veren_kisi',
         'siparis_durumu',
         'updated_at',
+        'created_at',
     ];
     public $timestamps = false;
 }
