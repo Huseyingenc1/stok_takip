@@ -11,6 +11,7 @@ class genel_stok extends Model
     use HasFactory, SoftDeletes;
     protected $table = "genel_stok";
     protected $fillable = [
+        'tenant_id',
         'urun_adi',
         'model',
         'kw',

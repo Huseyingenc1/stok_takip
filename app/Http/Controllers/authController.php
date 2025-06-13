@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,8 @@ class authController extends Controller
 
     public function loginstore(Request $req)
     {
+        $tenantId = session('selected_tenant_id'); // Firma ID'sini session'dan al
+
         $validator = Validator::make(
             $req->all(),
             [
@@ -34,23 +37,38 @@ class authController extends Controller
                 'password.required' => 'Şifre alanı boş geçilemez!',
             ]
         );
+
         if ($validator->fails()) {
             $message = $validator->errors()->all();
             return redirect()->back()->withErrors($message)->withInput();
         }
-        $nopassword_user = User::where('email', $req->email)->whereNull('password')->first();
+
+        // Şifresiz kullanıcı kontrolü (aynı tenant içinde)
+        $nopassword_user = User::where('email', $req->email)
+            ->where('tenant_id', $tenantId)
+            ->whereNull('password')
+            ->first();
+
         if ($nopassword_user) {
             return redirect(route('set_password'));
-        } elseif (Auth::attempt(["email" => $req->email, "password" => $req->password])) {
+        }
+
+        // Tenant kontrolü dahil giriş
+        if (Auth::attempt([
+            'email' => $req->email,
+            'password' => $req->password,
+            'tenant_id' => $tenantId
+        ])) {
             if (is_null(Auth::user()->password)) {
                 return redirect(route('set_password'));
             } else {
                 return redirect(route('anasayfa'));
             }
         } else {
-            return back()->withErrors(['email' => 'E-posta veya şifre geçersiz.']);
+            return back()->withErrors(['email' => 'E-posta, şifre veya firma hatalı olabilir.']);
         }
     }
+
 
     public function destroy()
     {
@@ -58,7 +76,7 @@ class authController extends Controller
         Auth::logout();
 
 
-        return redirect('/login')->with(['success' => 'Başarılı Çıkış Yaptınız']);
+        return redirect('/welcome')->with(['success' => 'Başarılı Çıkış Yaptınız']);
     }
 
     //REGİSTER -------
@@ -73,6 +91,7 @@ class authController extends Controller
 
     public function registerstore(Request $req)
     {
+        $tenantId = session('selected_tenant_id'); // Firma ID'sini session'dan al
 
         $validator = Validator::make(
             $req->all(),
@@ -81,7 +100,6 @@ class authController extends Controller
                 'phone' => 'required|max:13',
                 'email' => 'required|max:255|unique:users,email',
                 'password' => 'required',
-
             ],
             [
                 'name.required' => 'İsim alanı boş geçilemez!',
@@ -94,21 +112,23 @@ class authController extends Controller
                 'password.required' => 'Şifre alanı boş geçilemez!',
             ]
         );
+
         if ($validator->fails()) {
             $message = $validator->errors()->all();
             return redirect()->back()->withErrors($message)->withInput();
         }
 
-
-        session()->flash('success', 'Başarıyla Kayıt Edildi.');
+        // Kayıt işlemi
         $user = User::create([
-
             "name" => $req->name,
             "email" => $req->email,
             "phone" => $req->phone,
             "password" => Hash::make($req->password),
             "role" => 2,
+            "tenant_id" => $tenantId, // seçilen firma burada bağlanır
         ]);
+
+        session()->flash('success', 'Başarıyla Kayıt Edildi.');
 
         return redirect('/login');
     }
@@ -207,5 +227,37 @@ class authController extends Controller
 
         return redirect('/login');
     }
+
+
+    // --------------sayfaya ilk girildiğinde karşına çıkan firma seçim sayfası----------------------
+
+    public function welcomeget()
+    {
+        $tenant = Tenant::get();
+
+        return view('auth.welcome', compact('tenant'));
+    }
+
+    public function welcomestore(Request $request)
+    {
+        $tenantId = $request->tenant_id;
+
+        if (!$tenantId) {
+            return response()->json(['error' => 'Tenant ID yok.'], 400);
+        }
+
+        session(['selected_tenant_id' => $tenantId]);
+
+        return response()->json(['success' => true]);
+    }
+
+
+
+
+
+
+
+
+
     public $timestamps = false;
 }

@@ -11,34 +11,46 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StokMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class sectionsController extends Controller
 {
 
     public function home(Request $request)
     {
-        $alert = genel_stok::get();
-        $eksikStoklar = genel_stok::where('kalan_adet', '<', 10)->get();
-        $bugun = Carbon::today()->toDateString();
+        $tenantId = auth()->user()->tenant_id;
+        $alert = genel_stok::where('tenant_id', $tenantId)->get();
+        $users = User::where('tenant_id', $tenantId)->where('role', 1)->get();
+        $eksikStoklar = genel_stok::where('tenant_id', $tenantId)
+            ->where('kalan_adet', '<', 10)
+            ->get();
 
-        $targetId = $request->query('id'); // URL'den gelen ID
+        $bugun = Carbon::today()->toDateString();
+        $targetId = $request->query('id');
         $sayfa = 1;
 
         if ($targetId) {
-            $index = genel_stok::orderBy('updated_at', 'desc')->pluck('id')->search($targetId);
+            $index = genel_stok::where('tenant_id', $tenantId)
+                ->orderBy('updated_at', 'desc')
+                ->pluck('id')
+                ->search($targetId);
+
             if ($index !== false) {
-                $sayfa = floor($index / 20) + 1; // Her sayfada 20 kayıt varsa
+                $sayfa = floor($index / 20) + 1;
             }
         }
 
-        $genel = genel_stok::orderBy('updated_at', 'desc')->paginate(20, ['*'], 'page', $sayfa);
+        $genel = genel_stok::where('tenant_id', $tenantId)
+            ->orderBy('updated_at', 'desc')
+            ->paginate(20, ['*'], 'page', $sayfa);
 
         $genel->getCollection()->transform(function ($item) use ($bugun) {
             $item->bugunGuncellendi = Carbon::parse($item->updated_at)->toDateString() === $bugun;
             return $item;
         });
 
-        return view('genel_stok', compact('genel', 'alert', 'eksikStoklar', 'targetId'));
+        return view('genel_stok', compact('genel', 'alert', 'eksikStoklar', 'targetId', 'users'));
     }
 
 
@@ -70,6 +82,7 @@ class sectionsController extends Controller
         }
 
         $genel_stok = genel_stok::create([
+            "tenant_id" => auth()->user()->tenant_id,
             "urun_adi" => $req->urun_adi,
             "model" => $req->model,
             "kw" => $req->kw,
@@ -93,19 +106,29 @@ class sectionsController extends Controller
 
     public function genel_stokdelete($id)
     {
-        $genel_stok = genel_stok::where('id', $id)->firstOrFail();
+        $userTenantId = auth()->user()->tenant_id;
+
+        $genel_stok = genel_stok::where('id', $id)
+            ->where('tenant_id', $userTenantId)
+            ->first();
+
+        if (!$genel_stok) {
+            return redirect()->back()->with('error', 'Silme işlemi başarısız veya yetkisiz erişim!');
+        }
 
         $genel_stok->delete();
 
-        if ($genel_stok) {
-            return redirect()->back()->with('success', 'İşlem Başarıyla Silindi');
-        } else {
-            return redirect()->back()->with('error', 'İşlem Başarıyla Silinemedi');
-        }
+        return redirect()->back()->with('success', 'İşlem başarıyla silindi.');
     }
+
     public function genel_stokupdate(Request $req)
     {
-        $genel_stok = genel_stok::where('id', $req->id)->first();
+        $userTenantId = auth()->user()->tenant_id;
+
+        $genel_stok = genel_stok::where('id', $req->id)
+            ->where('tenant_id', $userTenantId)
+            ->first();
+
         if ($genel_stok) {
             $genel_stok->update([
                 "kalan_adet" => $req->kalan_adet,
@@ -114,39 +137,49 @@ class sectionsController extends Controller
                 "siparis_verildigi_yer" => $req->siparis_verildigi_yer,
                 "siparis_tarihi" => Carbon::parse($req->siparis_tarihi)->format('Y-m-d H:i'),
                 "siparis_durumu" => 'Sipariş Beklemede',
-                "updated_at" => Carbon::parse(now())->format('Y-m-d H:i'),
-
+                "updated_at" => now(),
             ]);
-            return redirect()->back()->with('success', 'İşlem Başarıyla Düzenlendi');
+
+            return redirect()->back()->with('success', 'İşlem başarıyla düzenlendi.');
         } else {
-            return redirect()->back()->with('error', 'İşlem Başarıyla Düzenlenemedi');
+            return redirect()->back()->with('error', 'Yetkisiz işlem veya veri bulunamadı.');
         }
     }
+
 
     public function genel_eksilt_artır(Request $request, $id)
     {
         try {
-            // İlgili item'ı bul
-            $item = genel_stok::findOrFail($id); // YourModel yerine kendi model adınızı yazın
+            $userTenantId = auth()->user()->tenant_id;
+
+            // Yalnızca kullanıcının tenant'ına ait olan item çekilir
+            $item = genel_stok::where('id', $id)
+                ->where('tenant_id', $userTenantId)
+                ->first();
+
+            if (!$item) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'İlgili stok bulunamadı veya yetkisiz işlem.'
+                ]);
+            }
 
             $action = $request->input('action');
             $newAdet = $request->input('new_adet');
 
-            // Güvenlik kontrolü
             if ($action === 'decrease' && $newAdet < 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Stok miktarı 0\'dan az olamaz'
+                    'message' => 'Stok miktarı 0\'dan az olamaz.'
                 ]);
             }
 
-            // Veritabanını güncelle
             $item->kalan_adet = $newAdet;
             $item->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Stok başarıyla güncellendi',
+                'message' => 'Stok başarıyla güncellendi.',
                 'new_adet' => $newAdet
             ]);
         } catch (\Exception $e) {
@@ -157,6 +190,7 @@ class sectionsController extends Controller
         }
     }
 
+
     public function siparis_durum_guncelle(Request $request, $id)
     {
         try {
@@ -165,7 +199,19 @@ class sectionsController extends Controller
                 'request_data' => $request->all()
             ]);
 
-            $item = genel_stok::findOrFail($id);
+            $userTenantId = auth()->user()->tenant_id;
+
+            // Yalnızca kullanıcının tenant'ına ait item alınır
+            $item = genel_stok::where('id', $id)
+                ->where('tenant_id', $userTenantId)
+                ->first();
+
+            if (!$item) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'İlgili stok bulunamadı veya yetkisiz işlem.'
+                ]);
+            }
 
             $yeniDurum = $request->input('yeni_durum');
 
@@ -186,17 +232,11 @@ class sectionsController extends Controller
             if (strtolower($yeniDurum) == 'sipariş teslim alındı') {
                 $eskiGuncelAdet = $item->guncel_siparis_adedi;
 
-                // 1. Kalan = kalan + güncel
-                $item->kalan_adet = $item->kalan_adet + $eskiGuncelAdet;
-
-                // 2. Önceki sipariş = eski güncel
+                $item->kalan_adet += $eskiGuncelAdet;
                 $item->onceki_siparis_adedi = $eskiGuncelAdet;
-
-                // 3. Güncel sipariş = 0
                 $item->guncel_siparis_adedi = 0;
             }
 
-            // Sipariş durumunu güncelle
             $item->siparis_durumu = $yeniDurum;
             $item->save();
 
@@ -220,18 +260,22 @@ class sectionsController extends Controller
     }
 
 
+
     public function search(Request $request)
     {
         $query = $request->input('q');
+        $userTenantId = auth()->user()->tenant_id;
 
         if ($query) {
-            $genel = genel_stok::where(function ($q) use ($query) {
-                $q->where('urun_adi', 'like', "%{$query}%")
-                    ->orWhere('model', 'like', "%{$query}%")
-                    ->orWhere('siparis_verildigi_yer', 'like', "%{$query}%");
-            })->paginate(20);
+            $genel = genel_stok::where('tenant_id', $userTenantId)
+                ->where(function ($q1) use ($query) {
+                    $q1->where('urun_adi', 'like', "%{$query}%")
+                        ->orWhere('model', 'like', "%{$query}%")
+                        ->orWhere('siparis_verildigi_yer', 'like', "%{$query}%");
+                })
+                ->paginate(20);
         } else {
-            $genel = genel_stok::paginate(20);
+            $genel = genel_stok::where('tenant_id', $userTenantId)->paginate(20);
         }
 
         $stok = stok::get();
@@ -239,21 +283,40 @@ class sectionsController extends Controller
         return view('genel_stok', compact('genel', 'stok'));
     }
 
-    public function stok_mail_gonder(Request $request)
+
+    public function stokMailGonder(Request $request)
     {
-        $alert = genel_stok::whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())->get();
-        // $alert = Stok::all();
-        // Mail adresini ayarla
-        Mail::to('ofvofv10@gmail.com')->send(new StokMail($alert));
-        // dd($alert);
-        return back()->with('success', 'Mail başarıyla gönderildi.');
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::where('id', $request->user_id)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->where('role', 1)
+            ->firstOrFail();
+
+        $alert = genel_stok::where('tenant_id', auth()->user()->tenant_id)
+            ->whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())
+            ->get();
+
+        Mail::to($user->email)->send(new StokMail($alert));
+
+        return back()->with('success', $user->name . ' adlı kullanıcıya mail gönderildi.');
     }
+
+
 
     public function stok_mail()
     {
-        $alert = genel_stok::whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())->get();
+        $userTenantId = auth()->user()->tenant_id;
+
+        $alert = genel_stok::where('tenant_id', $userTenantId)
+            ->whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())
+            ->get();
+
         return view('emails.stok_mail', compact('alert'));
     }
+
 
     public function onayla(Request $request)
     {
@@ -263,32 +326,37 @@ class sectionsController extends Controller
             return response('Geçersiz sipariş ID\'leri.', 400);
         }
 
+        $userTenantId = auth()->user()->tenant_id;
+
+        // Sadece kullanıcıya ait tenant ID'li stokları güncelle
         DB::table('genel_stok')
             ->whereIn('id', $ids)
+            ->where('tenant_id', $userTenantId)
             ->update(['siparis_durumu' => 'Sipariş Verildi']);
 
         return response('
-                            <html>
-                                <head>
-                                    <meta http-equiv="refresh" content="5;url=' . route('anasayfa') . '">
-                                    <script>
-                                        let seconds = 5;
-                                        const countdown = setInterval(function() {
-                                            if (seconds <= 1) {
-                                                clearInterval(countdown);
-                                            }
-                                            seconds--;
-                                            document.getElementById("countdown").innerText = seconds;
-                                        }, 1000);
-                                    </script>
-                                </head>
-                                <body style="font-family: Arial; text-align: center; padding-top: 50px;">
-                                    <h2 style="color: green;">Sipariş(ler) başarıyla onaylandı.</h2>
-                                    <p><span id="countdown">5</span> saniye içinde ana sayfaya yönlendiriliyorsunuz...</p>
-                                </body>
-                            </html>
-                     ');
+        <html>
+            <head>
+                <meta http-equiv="refresh" content="5;url=' . route('anasayfa') . '">
+                <script>
+                    let seconds = 5;
+                    const countdown = setInterval(function() {
+                        if (seconds <= 1) {
+                            clearInterval(countdown);
+                        }
+                        seconds--;
+                        document.getElementById("countdown").innerText = seconds;
+                    }, 1000);
+                </script>
+            </head>
+            <body style="font-family: Arial; text-align: center; padding-top: 50px;">
+                <h2 style="color: green;">Sipariş(ler) başarıyla onaylandı.</h2>
+                <p><span id="countdown">5</span> saniye içinde ana sayfaya yönlendiriliyorsunuz...</p>
+            </body>
+        </html>
+    ');
     }
+
 
 
 
@@ -353,5 +421,31 @@ class sectionsController extends Controller
         } else {
             return redirect()->back()->with('error', 'İşlem Başarıyla Düzenlenemedi');
         }
+    }
+
+    public function create()
+    {
+        return view('logo_upload');
+    }
+
+    public function store(Request $request)
+    {
+
+        $request->validate([
+            'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+
+        $user = auth()->user();
+
+        $path = $request->file('logo')->store('logos', 'public');
+
+        if ($user && $user->tenant) {
+            $tenant = $user->tenant;
+            $tenant->logo = $path;
+            $tenant->save();
+        }
+
+        return back()->with('success', 'Logo başarıyla yüklendi!');
     }
 }

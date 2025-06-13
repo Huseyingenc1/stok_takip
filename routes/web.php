@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('', function () {
-    return redirect()->route('login.get');
+    return redirect()->route('welcome.get');
 });
+Route::get('/welcome', [authController::class, 'welcomeget'])->name('welcome.get');
+Route::post('/welcome-session', [authController::class, 'welcomestore'])->name('welcome.post');
 
 Route::get('/login', [authController::class, 'loginget'])->name('login.get');
 Route::post('/session', [authController::class, 'loginstore'])->name('login.post');
@@ -54,11 +56,13 @@ Route::middleware(AuthCheck::class)->group(function () {
     Route::post('/siparis-durum-guncelle/{id}', [SectionsController::class, 'siparis_durum_guncelle'])->name('siparis_durum_guncelle');
     Route::get('/stok-ara', [SectionsController::class, 'stokAra'])->name('stok.ara');
 
-    Route::post('/stok_mail_gonder', [SectionsController::class, 'stok_mail_gonder'])->name('stok_mail_gonder');
+    Route::post('/stok_mail_gonder', [SectionsController::class, 'stokMailGonder'])->name('stokMailGonder');
     Route::get('/stok_mail', [SectionsController::class, 'stok_mail'])->name('stok_mail');
     Route::get('/siparis/onayla', [SectionsController::class, 'onayla'])->name('siparis.onayla');
 
 
+    Route::get('/logo-upload', [sectionsController::class, 'create'])->name('logo.form');
+    Route::post('/logo-upload', [sectionsController::class, 'store'])->name('logo.upload');
 
 
     Route::get('/stok_listesi', [SectionsController::class, 'stok'])->name('stok');

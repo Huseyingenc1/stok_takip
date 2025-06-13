@@ -39,16 +39,15 @@
                 background-color: #fff3cd;
             }
         }
-
-
-
     </style>
     <nav class="navbar navbar-expand-lg mb-12 bg-body-tertiary">
         <div class="container-fluid">
-            {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2 w-100"> --}}
-            <img src="/assets/img/ikon29.png" alt="Resim bulunamadı" class="">
-            {{-- </a> --}}
 
+
+            {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2 w-100"> --}}
+            <img src="{{ asset('storage/' . auth()->user()->tenant->logo) }}" alt="Resim bulunamadı"  style="max-height: 70px; max-width: 150px; height: auto; width: auto;">
+
+            {{-- </a> --}}
             <div class="ps-5 pt-lg-3">
                 <h3>
                     HOŞ GELDİNİZ {{ auth()->user()->name }}

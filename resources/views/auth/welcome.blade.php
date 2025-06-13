@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="/assets/vendor/css/pages/page-auth.css" />
     <script src="/assets/vendor/js/helpers.js"></script>
     <script src="/assets/js/config.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -35,18 +36,9 @@
             <div class="authentication-inner">
                 <div class="card">
                     <div class="card-body">
-                        <div class="app-brand justify-content-center">
-                            @php
-                                $tenant = \App\Models\Tenant::find(session('selected_tenant_id'));
-                            @endphp
 
-                            @if ($tenant && $tenant->logo)
-                                <img src="{{ asset('storage/' . $tenant->logo) }}" alt="Resim bulunamadı"
-                                    style="max-height: 150px; max-width: 180px; height: auto; width: auto;">
-                            @endif
-                        </div>
                         <h4 class="mb-2">Hoş Geldiniz ! </h4>
-                        <p class="mb-4">Lütfen hesabınıza giriş yapın ...</p>
+                        <p class="mb-4">Lütfen Firmanızı Seçin ...</p>
                         @if ($errors->any())
                             <div class="row gap-3">
                                 @foreach ($errors->all() as $error)
@@ -56,55 +48,28 @@
                                 @endforeach
                             </div>
                         @endif
-                        <form id="loginform" class="mb-3" action="{{ route('login.post') }}" method="POST">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Adres</label>
-                                <input type="text" class="form-control" name="email" id="floatingInput"
-                                    placeholder="Lütfen email adresinizi giriniz" autofocus />
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="password">Lütfen Firmanızı Seçiniz !!!</label>
                             </div>
-                            <div class="mb-3 form-password-toggle">
-                                <div class="d-flex justify-content-between">
-                                    <label class="form-label" for="password">Şifre</label>
-                                </div>
-                                <div class="input-group input-group-merge">
-                                    <input type="password" id="password" class="form-control" name="password"
-                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                        aria-describedby="password" />
-                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                </div>
+                            <div class="input-group input-group-merge">
+                                <select id="tenant-select" class="select2" style="width: 100%">
+                                    <option value="">Seçiniz</option>
+                                    @foreach ($tenant as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                            <div class="mb-3">
-                                {{-- <button
+                        </div>
+
+                        <div class="mb-3">
+                            {{-- <button
                                     class="btn btn-primary d-grid w-100 product-giris-buton "onclick="disabledbutton(this)"
                                     type="button">Giriş Yap</button> --}}
-                                <button class="btn btn-primary d-grid w-100 product-giris-buton " id="submitButton"
-                                    onclick="disabledbutton(this)" type="button">Giriş Yap</button>
-                            </div>
-                        </form>
-                        <p class="text-center">
-                            <a href="{{ route('forgot_password') }}">
-                                <small>
-                                    Şifreni'mi unuttun ?
-                                </small>
-                            </a>
-                        </p>
-                        <p class="text-center">
-                            veya
-                        </p>
-                        <a href="{{ route('register.post') }}" class="d-flex justify-content-center">
-                            <small>
-                                Kayıt ol
-                            </small>
-                        </a>
-                        <p class="text-center">
-                            veya
-                        </p>
-                        <a href="{{ route('welcome.get') }}" class="d-flex justify-content-center">
-                            <small>
-                                Şirket Değiştir
-                            </small>
-                        </a>
+                            <button class="btn btn-primary d-grid w-100 product-giris-buton"
+                                onclick="selectTenant()">İleri</button>
+                        </div>
+
                         <span class="app-brand-link gap-sm-0  text-muted">
                             <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="50"
                                 class="">
@@ -135,18 +100,54 @@
             <script src="/assets/vendor/js/menu.js"></script>
             <script src="/assets/js/main.js"></script>
             <script async defer src="https://buttons.github.io/buttons.js"></script>
-            {{-- <script>
-        const input = document.querySelector('#floatingInput');
-        const button = document.querySelector('.product-giris-buton');
-        button.disabled = true; // butonu varsayılan olarak devre dışı bırak
-        input.addEventListener('input', function() {
-            if (input.value.trim() !== '') { // inputta yazı varsa butonu etkinleştir
-                button.disabled = false;
-            } else {
-                button.disabled = true; // inputta yazı yoksa butonu devre dışı bırak
-            }
-        });
-    </script> --}}
+            <!-- Select2 JS -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+            <!-- Select2 Başlat -->
+            <script>
+                $(document).ready(function() {
+                    $('#tenant-select').select2({
+                        placeholder: "Bir firma seçin",
+                        allowClear: true
+                    });
+                });
+            </script>
+            <script>
+                function selectTenant() {
+                    const tenantId = document.getElementById('tenant-select').value;
+
+                    if (!tenantId) {
+                        alert("Lütfen bir firma seçiniz.");
+                        return;
+                    }
+
+                    fetch("{{ route('welcome.post') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                tenant_id: tenantId
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Sunucu hatası.");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            window.location.href = "/login";
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            alert("Bir hata oluştu.");
+                        });
+                }
+            </script>
+
 </body>
 
 </html>

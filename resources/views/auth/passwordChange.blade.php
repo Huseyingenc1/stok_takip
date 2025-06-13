@@ -34,7 +34,14 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="app-brand justify-content-center">
-                            <img src="/assets/img/ikon29.png" alt="Resim bulunamadı" width="100%" >
+                            @php
+                                $tenant = \App\Models\Tenant::find(session('selected_tenant_id'));
+                            @endphp
+
+                            @if ($tenant && $tenant->logo)
+                                <img src="{{ asset('storage/' . $tenant->logo) }}" alt="Resim bulunamadı"
+                                    style="max-height: 150px; max-width: 180px; height: auto; width: auto;">
+                            @endif
                         </div>
                         @if (session()->has('success'))
                             <div class="alert alert-success">
