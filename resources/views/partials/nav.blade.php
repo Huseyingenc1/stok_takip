@@ -45,10 +45,12 @@
 
 
             {{-- <a href="{{ route('anasayfa') }}" class="app-brand-link gap-2 w-100"> --}}
-            <img src="{{ asset('storage/' . auth()->user()->tenant->logo) }}" alt="Resim bulunamadı"  style="max-height: 70px; max-width: 150px; height: auto; width: auto;">
+            <img src="{{ asset('storage/' . auth()->user()->tenant->logo) }}" alt="Resim bulunamadı"
+                style="max-height: 70px; max-width: 150px; height: auto; width: auto;">
+
 
             {{-- </a> --}}
-            <div class="ps-5 pt-lg-3">
+            <div class="ps-5 pt-lg-3 pe-5">
                 <h3>
                     HOŞ GELDİNİZ {{ auth()->user()->name }}
                 </h3>
@@ -60,22 +62,22 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                    {{-- <li class="nav-item">
+                    <li class="nav-item">
                         <a href="{{ route('anasayfa') }}"
                             class="menu-link text-dark flex-column gap-2 {{ Route::is('anasayfa') ? 'active' : '' }}">
                             <div class="menu-rota btn d-flex flex-column py-1">
-                                <span class="align-middle">STOK LİSTESİ </span>
+                                <span class="align-middle">Ana Sayfa </span>
                             </div>
                         </a>
-                    </li> --}}
-                    {{-- <li class="nav-item">
-                        <a href="{{ route('stok') }}"
-                            class="menu-link text-dark flex-column gap-2 {{ Route::is('stok') ? 'active' : '' }}">
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('stok_takip_pdf') }}"
+                            class="menu-link text-dark flex-column gap-2 {{ Route::is('stok_takip_pdf') ? 'active' : '' }}">
                             <div class="menu-rota btn d-flex flex-column py-1">
-                                <span class="align-middle">ÜRÜN LİSTESİ</span>
+                                <span class="align-middle">Stok Takip PDF</span>
                             </div>
                         </a>
-                    </li> --}}
+                    </li>
                 </ul>
                 <form class="d-flex" method="GET" action="{{ route('search') }}">
                     <input name="q" class="form-control me-2" type="search" placeholder="Ürün Ara"
@@ -89,11 +91,29 @@
                                 class="menu-icon tf-icons"></a>
                     </div>
                 </form>
+                @if (auth()->user()->role != 2)
+                    <div class="">
+                        <a href="{{ route('register.get') }}"
+                            class="btn btn-outline-primary ms-2 select2-search--dropdown">
+                            <img src="assets/img/ikon33.png" alt="" width="37" class="menu-icon tf-icons">
+                        </a>
+
+                    </div>
+                @endif
+
+
+
+
                 <div class="btn-group dropstart">
+                    @php
+                        $eksikStoklar = $alert->where('kalan_adet', '<', 10);
+                        $eksikStokSayisi = $eksikStoklar->count();
+                    @endphp
+
                     <button class="btn ms-2 position-relative" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <img src="assets/img/ikon32.gif" alt="" width="37" class="menu-icon tf-icons">
-                        @php $eksikStokSayisi = $alert->where('kalan_adet', '<', 10)->count(); @endphp
+
                         @if ($eksikStokSayisi > 0)
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -102,35 +122,30 @@
                             </span>
                         @endif
                     </button>
-                    @php $eksikStokSayisi = $eksikStoklar->count(); @endphp
+
                     <ul class="dropdown-menu"
                         style="@if ($eksikStokSayisi > 20) max-height: 400px; overflow-y: auto; @endif">
                         <li>
-                            <p class="text-center"><strong> UYARILAR !!! ({{ $eksikStokSayisi }})</strong></p>
+                            <p class="text-center"><strong>UYARILAR !!! ({{ $eksikStokSayisi }})</strong></p>
                         </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
+
                         @forelse ($eksikStoklar as $item)
-                            {{-- <li>
-                                <a class="dropdown-item" href="javascript:void(0);"
-                                    onclick="tabloSatiriBul({{ $item->id }})">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('genel_stok', ['id' => $item->id]) }}">
                                     {{ $item->urun_adi }} -> {{ $item->model }} -> {{ $item->kw ?: '-' }}
                                 </a>
-                            </li> --}}
-                            <li>
-                                <a class="dropdown-item"
-                                    href="{{ route('genel_stok', ['id' => $item->id]) }}">{{ $item->urun_adi }} ->
-                                    {{ $item->model }} -> {{ $item->kw ?: '-' }}</a>
                             </li>
                         @empty
                             <li>
                                 <p class="dropdown-item-text">Herhangi bir eksik stok bulunmamaktadır...</p>
                             </li>
                         @endforelse
-
                     </ul>
                 </div>
+
 
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <li>
@@ -146,7 +161,12 @@
             </div>
         </div>
 
+        {{-- -------------------------- bu modal register modalı ----------------------------- --}}
+
     </nav>
+
+
+
 </body>
 {{-- <li>
                     <a class="dropdown-item" href="{{ route('profile') }}">

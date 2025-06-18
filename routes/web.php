@@ -9,17 +9,13 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('', function () {
-    return redirect()->route('welcome.get');
+    return redirect()->route('home.get');
 });
-Route::get('/welcome', [authController::class, 'welcomeget'])->name('welcome.get');
-Route::post('/welcome-session', [authController::class, 'welcomestore'])->name('welcome.post');
 
 Route::get('/login', [authController::class, 'loginget'])->name('login.get');
 Route::post('/session', [authController::class, 'loginstore'])->name('login.post');
 
 
-Route::get('/register', [authController::class, 'registercreate'])->name('register.get');
-Route::post('/register', [authController::class, 'registerstore'])->name('register.post');
 
 Route::get('/set_password', [authController::class, 'index'])->name('set_password');
 Route::post('/set_password/update', [authController::class, 'update'])->name('set_password_update');
@@ -64,11 +60,20 @@ Route::middleware(AuthCheck::class)->group(function () {
     Route::get('/logo-upload', [sectionsController::class, 'create'])->name('logo.form');
     Route::post('/logo-upload', [sectionsController::class, 'store'])->name('logo.upload');
 
+    Route::get('/stok_takip_pdf', [SectionsController::class, 'stok_takip_pdf'])->name('stok_takip_pdf');
+
+
 
     Route::get('/stok_listesi', [SectionsController::class, 'stok'])->name('stok');
     Route::post('stok_listesi_post', [SectionsController::class, 'stokCreate'])->name('stok_listesiPost');
     Route::post('stok_listesi_update', [SectionsController::class, 'stokupdate'])->name('stokupdate');
     Route::get('/stok_listesi/stok_listesi/{id}', [SectionsController::class, 'stokdelete'])->name('stokdelete');
+
+    Route::get('/register', [authController::class, 'registercreate'])->name('register.get');
+    Route::post('/register', [authController::class, 'registerstore'])->name('register.post');
+
+    Route::post('/user_update', [authController::class, 'user_update'])->name('user_update');
+    Route::get('/user_delete/{id}', [authController::class, 'user_delete'])->name('user_delete');
 
     Route::get('/user', [SectionsController::class, 'login'])->name('login');
 });

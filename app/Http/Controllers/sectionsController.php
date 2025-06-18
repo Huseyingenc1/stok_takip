@@ -10,9 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StokMail;
+use App\Models\stok_takip_pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use PDF; // Barryvdh\DomPDF\Facade\Pdf
+
+use function Laravel\Prompts\alert;
 
 class sectionsController extends Controller
 {
@@ -20,6 +24,7 @@ class sectionsController extends Controller
     public function home(Request $request)
     {
         $tenantId = auth()->user()->tenant_id;
+
         $alert = genel_stok::where('tenant_id', $tenantId)->get();
         $users = User::where('tenant_id', $tenantId)->where('role', 1)->get();
         $eksikStoklar = genel_stok::where('tenant_id', $tenantId)
@@ -28,22 +33,29 @@ class sectionsController extends Controller
 
         $bugun = Carbon::today()->toDateString();
         $targetId = $request->query('id');
-        $sayfa = 1;
-
         if ($targetId) {
-            $index = genel_stok::where('tenant_id', $tenantId)
+            $orderedIds = genel_stok::where('tenant_id', $tenantId)
                 ->orderBy('updated_at', 'desc')
-                ->pluck('id')
-                ->search($targetId);
+                ->pluck('id');
+
+            $index = $orderedIds->search($targetId);
 
             if ($index !== false) {
                 $sayfa = floor($index / 20) + 1;
-            }
-        }
 
-        $genel = genel_stok::where('tenant_id', $tenantId)
-            ->orderBy('updated_at', 'desc')
-            ->paginate(20, ['*'], 'page', $sayfa);
+                $genel = genel_stok::where('tenant_id', $tenantId)
+                    ->orderBy('updated_at', 'desc')
+                    ->paginate(20, ['*'], 'page', $sayfa);
+            } else {
+                $genel = genel_stok::where('tenant_id', $tenantId)
+                    ->orderBy('updated_at', 'desc')
+                    ->paginate(20);
+            }
+        } else {
+            $genel = genel_stok::where('tenant_id', $tenantId)
+                ->orderBy('updated_at', 'desc')
+                ->paginate(20);
+        }
 
         $genel->getCollection()->transform(function ($item) use ($bugun) {
             $item->bugunGuncellendi = Carbon::parse($item->updated_at)->toDateString() === $bugun;
@@ -52,6 +64,7 @@ class sectionsController extends Controller
 
         return view('genel_stok', compact('genel', 'alert', 'eksikStoklar', 'targetId', 'users'));
     }
+
 
 
 
@@ -263,8 +276,10 @@ class sectionsController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->input('q');
         $userTenantId = auth()->user()->tenant_id;
+        $alert = genel_stok::where('tenant_id', $userTenantId)->get();
+        $users = User::where('tenant_id', $userTenantId)->get();
+        $query = $request->input('q');
 
         if ($query) {
             $genel = genel_stok::where('tenant_id', $userTenantId)
@@ -273,14 +288,15 @@ class sectionsController extends Controller
                         ->orWhere('model', 'like', "%{$query}%")
                         ->orWhere('siparis_verildigi_yer', 'like', "%{$query}%");
                 })
-                ->paginate(20);
+                ->paginate(20)
+                ->appends(['q' => $query]);
         } else {
             $genel = genel_stok::where('tenant_id', $userTenantId)->paginate(20);
         }
 
         $stok = stok::get();
 
-        return view('genel_stok', compact('genel', 'stok'));
+        return view('genel_stok', compact('genel', 'stok', 'alert', 'users'));
     }
 
 
@@ -295,13 +311,40 @@ class sectionsController extends Controller
             ->where('role', 1)
             ->firstOrFail();
 
-        $alert = genel_stok::where('tenant_id', auth()->user()->tenant_id)
+        $tenantId = auth()->user()->tenant_id;
+
+        $alert = genel_stok::where('tenant_id', $tenantId)
             ->whereDate('updated_at', Carbon::now('Europe/Istanbul')->toDateString())
             ->get();
 
+        // PDF oluştur
+        $pdf = Pdf::loadView('stok_takip_pdf', [
+            'alert' => $alert,
+            'stp' => collect() // bu view içinde boş döner, sorun olmaz
+        ]);
+
+        $fileName = 'stok_takip_' . now()->format('Ymd_His') . '.pdf';
+        $pdfPath = 'stok_takip_pdf/' . $fileName;
+
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+
+        // Veritabanına kayıt
+        $cleanDate = now()->format('Y-m-d');
+        $fileName = $cleanDate . '_stok_listesi.pdf';
+
+        stok_takip_pdf::create([
+            'tenant_id'   => $tenantId,
+            'pdf_adi'     => $fileName,
+            'pdf_tarihi'  => $cleanDate,
+            'dosya_yolu'  => $pdfPath,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        // Mail gönder
         Mail::to($user->email)->send(new StokMail($alert));
 
-        return back()->with('success', $user->name . ' adlı kullanıcıya mail gönderildi.');
+        return back()->with('success', $user->name . ' adlı kullanıcıya mail gönderildi ve PDF kayıt edildi: ' . $fileName);
     }
 
 
@@ -356,6 +399,20 @@ class sectionsController extends Controller
         </html>
     ');
     }
+
+
+    // ----------------------stok takip pdf -----------------------------
+    public function stok_takip_pdf()
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $alert = genel_stok::where('tenant_id', $tenantId)->get();
+        $stp = stok_takip_pdf::where('tenant_id', $tenantId)->get();
+
+        return view('stok_takip_pdf', compact('stp', 'alert'));
+    }
+
+
+
 
 
 

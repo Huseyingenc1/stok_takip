@@ -74,7 +74,6 @@
                 @endif
             </div>
             <div class="table-responsive text-nowrap">
-                @if (auth()->user()->tenant_id == session('selected_tenant_id'))
                     <table class="table">
                         <thead>
                             <tr class="small">
@@ -259,7 +258,6 @@
                         </tfoot>
 
                     </table>
-                @endif
 
                 <div class="row mx-3 justify-content-between">
                     <div class="d-md-flex justify-content-between align-items-center dt-layout-start col-md-auto me-auto">
@@ -429,10 +427,13 @@
                                 <label for="">Mail Gönderilecek Kişi</label>
                                 <select name="user_id" class="form-control" required>
                                     <option value="">Seçiniz</option>
+
                                     @foreach ($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}
-                                            ({{ $user->email }})
-                                        </option>
+                                        @if ($user->role == 1)
+                                            <option value="{{ $user->id }}">{{ $user->name }}
+                                                ({{ $user->email }})
+                                            </option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant;
+use App\Models\genel_stok;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +23,7 @@ class authController extends Controller
 
     public function loginstore(Request $req)
     {
-        $tenantId = session('selected_tenant_id'); // Firma ID'sini session'dan al
-
+        // Doğrulama kuralları
         $validator = Validator::make(
             $req->all(),
             [
@@ -38,34 +37,34 @@ class authController extends Controller
             ]
         );
 
+        // Doğrulama hatalıysa geri dön
         if ($validator->fails()) {
             $message = $validator->errors()->all();
             return redirect()->back()->withErrors($message)->withInput();
         }
 
-        // Şifresiz kullanıcı kontrolü (aynı tenant içinde)
-        $nopassword_user = User::where('email', $req->email)
-            ->where('tenant_id', $tenantId)
-            ->whereNull('password')
-            ->first();
-
+        // Şifresi olmayan kullanıcı kontrolü
+        $nopassword_user = User::where('email', $req->email)->whereNull('password')->first();
         if ($nopassword_user) {
             return redirect(route('set_password'));
         }
 
-        // Tenant kontrolü dahil giriş
-        if (Auth::attempt([
-            'email' => $req->email,
-            'password' => $req->password,
-            'tenant_id' => $tenantId
-        ])) {
-            if (is_null(Auth::user()->password)) {
+        // Kullanıcı doğrulama
+        if (Auth::attempt(["email" => $req->email, "password" => $req->password])) {
+            $user = Auth::user();
+
+            // tenant_id'yi oturuma kaydet
+            session(['tenant_id' => $user->tenant_id]);
+
+            // Şifre null ise yönlendir
+            if (is_null($user->password)) {
                 return redirect(route('set_password'));
             } else {
                 return redirect(route('anasayfa'));
             }
         } else {
-            return back()->withErrors(['email' => 'E-posta, şifre veya firma hatalı olabilir.']);
+            // Giriş başarısız
+            return back()->withErrors(['email' => 'E-posta veya şifre geçersiz.']);
         }
     }
 
@@ -76,61 +75,62 @@ class authController extends Controller
         Auth::logout();
 
 
-        return redirect('/welcome')->with(['success' => 'Başarılı Çıkış Yaptınız']);
+        return redirect('/login')->with(['success' => 'Başarılı Çıkış Yaptınız']);
     }
 
     //REGİSTER -------
 
     public function registercreate()
     {
-
-        return view('auth.register');
+        $tenantId = auth()->user()->tenant_id;
+        $alert = genel_stok::where('tenant_id', $tenantId)->get();
+        $user = User::where('tenant_id', $tenantId)->get();
+        return view('auth.register', compact('alert', 'user'));
     }
 
 
 
     public function registerstore(Request $req)
     {
-        $tenantId = session('selected_tenant_id'); // Firma ID'sini session'dan al
 
         $validator = Validator::make(
             $req->all(),
             [
                 'name' => 'required|max:255',
-                'phone' => 'required|max:13',
+                'telefon' => 'required|max:13',
                 'email' => 'required|max:255|unique:users,email',
                 'password' => 'required',
+
             ],
             [
                 'name.required' => 'İsim alanı boş geçilemez!',
                 'name.max' => 'İsim alanı en fazla 255 karakter olabilir!',
-                'phone.required' => 'Telefon alanı boş geçilemez!',
-                'phone.max' => 'Telefon alanı en fazla 13 karakter olabilir!',
+                'telefon.required' => 'Telefon alanı boş geçilemez!',
+                'telefon.min' => 'Telefon alanı en az 11 karakter olabilir!',
+                'telefon.max' => 'Telefon alanı en fazla 13 karakter olabilir!',
                 'email.required' => 'E-posta alanı boş geçilemez!',
                 'email.max' => 'E-posta alanı en fazla 255 karakter olabilir!',
                 'email.unique' => 'E-posta adresi farklı bir kullanıcı tarafından kullanılıyor!',
                 'password.required' => 'Şifre alanı boş geçilemez!',
             ]
         );
-
         if ($validator->fails()) {
             $message = $validator->errors()->all();
             return redirect()->back()->withErrors($message)->withInput();
         }
 
-        // Kayıt işlemi
-        $user = User::create([
-            "name" => $req->name,
-            "email" => $req->email,
-            "phone" => $req->phone,
-            "password" => Hash::make($req->password),
-            "role" => 2,
-            "tenant_id" => $tenantId, // seçilen firma burada bağlanır
-        ]);
 
         session()->flash('success', 'Başarıyla Kayıt Edildi.');
+        $user = User::create([
 
-        return redirect('/login');
+            "name" => $req->name,
+            "email" => $req->email,
+            "telefon" => $req->telefon,
+            "password" => Hash::make($req->password),
+            "role" => 2,
+            "tenant_id" => auth()->user()->tenant_id
+        ]);
+        return redirect('/register');
     }
 
 
@@ -228,30 +228,34 @@ class authController extends Controller
         return redirect('/login');
     }
 
-
-    // --------------sayfaya ilk girildiğinde karşına çıkan firma seçim sayfası----------------------
-
-    public function welcomeget()
+    public function user_update(Request $req)
     {
-        $tenant = Tenant::get();
+        $user = User::where('id', $req->id)->first();
+        if ($user) {
+            $user->update([
+                "name" => $req->name,
+                "email" => $req->email,
+                "role" => $req->role,
+                "telefon" => $req->telefon,
 
-        return view('auth.welcome', compact('tenant'));
-    }
-
-    public function welcomestore(Request $request)
-    {
-        $tenantId = $request->tenant_id;
-
-        if (!$tenantId) {
-            return response()->json(['error' => 'Tenant ID yok.'], 400);
+            ]);
+            return redirect()->back()->with('success', 'İşlem Başarıyla Düzenlendi');
+        } else {
+            return redirect()->back()->with('error', 'İşlem Başarıyla Düzenlenemedi');
         }
-
-        session(['selected_tenant_id' => $tenantId]);
-
-        return response()->json(['success' => true]);
     }
 
+    public function user_delete($id)
+    {
+        $user = user::where('id', $id)->firstOrFail();
+        $user->delete();
 
+        if ($user) {
+            return redirect()->back()->with('success', 'İşlem Başarıyla Silindi');
+        } else {
+            return redirect()->back()->with('error', 'İşlem Başarıyla Silinemedi');
+        }
+    }
 
 
 

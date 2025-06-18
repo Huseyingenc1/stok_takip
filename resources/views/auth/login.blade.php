@@ -89,22 +89,22 @@
                                 </small>
                             </a>
                         </p>
-                        <p class="text-center">
+                        {{-- <p class="text-center">
                             veya
-                        </p>
-                        <a href="{{ route('register.post') }}" class="d-flex justify-content-center">
+                        </p> --}}
+                        {{-- <a href="{{ route('register.post') }}" class="d-flex justify-content-center">
                             <small>
                                 Kayıt ol
                             </small>
-                        </a>
-                        <p class="text-center">
+                        </a> --}}
+                        {{-- <p class="text-center">
                             veya
-                        </p>
-                        <a href="{{ route('welcome.get') }}" class="d-flex justify-content-center">
+                        </p> --}}
+                        {{-- <a href="{{ route('welcome.get') }}" class="d-flex justify-content-center">
                             <small>
                                 Şirket Değiştir
                             </small>
-                        </a>
+                        </a> --}}
                         <span class="app-brand-link gap-sm-0  text-muted">
                             <img src="/assets/img/GNCTurco_Logo.png" alt="Resim bulunamadı" width="50"
                                 class="">
